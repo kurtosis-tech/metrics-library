@@ -2,19 +2,31 @@ package main
 
 import (
 	sp "github.com/snowplow/snowplow-golang-tracker/v2/tracker"
+	"gopkg.in/segmentio/analytics-go.v3"
 	"log"
 	"time"
 )
 
 func main() {
 
+	client := analytics.New("WbfsEYlBdRyaML5adTucEzqBkpQsz4p7") //Key generated in my lporoli trial account
+	defer client.Close()
 
+	//this call should be executed only the first time and also if some traits change
+	client.Enqueue(analytics.Identify{
+		UserId: "KurtosisKDHashedUserID",
+		Traits: analytics.NewTraits().
+			Set("plan", "full"),
+	})
 
+	client.Enqueue(analytics.Track{
+		Event:  "module-load",
+		UserId: "KurtosisKDHashedUserID",
+		Properties: analytics.NewProperties().
+			Set("module-name", "eth2-merge-kurtosis-module"),
+	})
 
-
-
-
-
+	time.Sleep(5 * time.Minute)
 
 }
 
