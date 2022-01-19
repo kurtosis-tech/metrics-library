@@ -1,7 +1,6 @@
 package snow_plow_client
 
 import (
-	"github.com/kurtosis-tech/metrics-library/lib/client"
 	"github.com/kurtosis-tech/metrics-library/lib/event"
 	metrics_source "github.com/kurtosis-tech/metrics-library/lib/source"
 	"github.com/kurtosis-tech/stacktrace"
@@ -34,7 +33,7 @@ type SnowPlowClient struct {
 	tracker *sp.Tracker
 }
 
-func NewSnowPlowClient(source metrics_source.Source, userId string) (client.MetricsClient, error) {
+func NewSnowPlowClient(source metrics_source.Source, userId string) (*SnowPlowClient, error) {
 	if err := source.IsValid(); err != nil {
 		return nil, stacktrace.Propagate(err, "Invalid source")
 	}
