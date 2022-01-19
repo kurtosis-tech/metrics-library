@@ -11,6 +11,7 @@ const (
 )
 
 var allValidCategories = map[Category]bool{
+	InstallCategory: true,
 	EnclaveCategory: true,
 	ModuleCategory:  true,
 }
