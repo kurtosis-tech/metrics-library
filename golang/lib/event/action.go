@@ -3,13 +3,13 @@ package event
 import "github.com/kurtosis-tech/stacktrace"
 
 const (
-	CreateAction Action = "create"
-	RemoveAction Action = "remove"
-	StartAction  Action = "start"
-	StopAction   Action = "stop"
-	LoadAction   Action = "load"
-	UnloadAction Action = "unload"
-	Consent      Action = "consent"
+	CreateAction  Action = "create"
+	RemoveAction  Action = "remove"
+	StartAction   Action = "start"
+	StopAction    Action = "stop"
+	LoadAction    Action = "load"
+	UnloadAction  Action = "unload"
+	ConsentAction Action = "consent"
 )
 
 var allValidActions = map[Action]bool{
@@ -34,7 +34,7 @@ var allValidModuleActions = map[Action]bool{
 }
 
 var allValidInstallActions = map[Action]bool{
-	Consent: true,
+	ConsentAction: true,
 }
 
 var allValidActionsByCategory = map[Category]map[Action]bool{
