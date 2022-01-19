@@ -1,4 +1,4 @@
-module github.com/kurtosis-tech/metrics-library
+module github.com/kurtosis-tech/metrics-library/golang
 
 go 1.15
 
