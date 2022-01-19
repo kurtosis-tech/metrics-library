@@ -34,7 +34,7 @@ type SnowPlowClient struct {
 	tracker *sp.Tracker
 }
 
-func NewSnowPlowClient(source *metrics_source.Source, userId string) (client.MetricsClient, error) {
+func NewSnowPlowClient(source metrics_source.Source, userId string) (client.MetricsClient, error) {
 	if err := source.IsValid(); err != nil {
 		return nil, stacktrace.Propagate(err, "Invalid source")
 	}
@@ -53,7 +53,7 @@ func NewSnowPlowClient(source *metrics_source.Source, userId string) (client.Met
 		//Now we are using "pc" as default, but in the future we could use "srv"
 		//for Kurt-Engine and Kurt-API sources is they run in KurtosisSAS
 		sp.OptionPlatform(spDefaultPlatform),
-		sp.OptionAppId(string(*source)),
+		sp.OptionAppId(string(source)),
 	)
 
 	return &SnowPlowClient{tracker: tracker}, nil
