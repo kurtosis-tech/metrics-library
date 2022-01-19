@@ -1,8 +1,8 @@
 package snow_plow_client
 
 import (
-	"github.com/kurtosis-tech/metrics-library/lib/event"
-	metrics_source "github.com/kurtosis-tech/metrics-library/lib/source"
+	"github.com/kurtosis-tech/metrics-library/golang/lib/event"
+	metrics_source "github.com/kurtosis-tech/metrics-library/golang/lib/source"
 	"github.com/kurtosis-tech/stacktrace"
 	"github.com/sirupsen/logrus"
 	sp "github.com/snowplow/snowplow-golang-tracker/v2/tracker"
