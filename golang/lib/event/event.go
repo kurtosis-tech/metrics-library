@@ -49,6 +49,20 @@ func (event *Event) GetValue() float64 {
 	return event.value
 }
 
+//IsValid return nil if the event is valid
+func (event *Event) IsValid() error {
+	if err := event.category.IsValid(); err != nil {
+		return stacktrace.Propagate(err, "Invalid event's category")
+	}
+
+	if err := event.action.IsValidForCategory(event.category); err != nil {
+		return stacktrace.Propagate(err, "Invalid event's action")
+	}
+
+	return nil
+}
+
+
 // ====================================================================================================
 //                                      Builder
 // ====================================================================================================
@@ -60,20 +74,14 @@ type EventBuilder struct {
 	value    float64
 }
 
-func NewEventBuilder(category Category, action Action) (*EventBuilder, error) {
-	eventBuilder := &EventBuilder{
+func NewEventBuilder(category Category, action Action) *EventBuilder {
+	return &EventBuilder{
 		category: category,
 		action:   action,
 		label:    "",
 		property: "",
 		value:    0,
 	}
-
-	if err := eventBuilder.isValid(); err != nil {
-		return nil, stacktrace.Propagate(err, "Invalid event")
-	}
-
-	return eventBuilder, nil
 }
 
 func (builder *EventBuilder) WithLabel(label string) *EventBuilder {
@@ -91,24 +99,18 @@ func (builder *EventBuilder) WithValue(value float64) *EventBuilder {
 	return builder
 }
 
-func (builder *EventBuilder) Build() *Event {
-	return &Event{
+func (builder *EventBuilder) Build() (*Event, error) {
+	event := &Event{
 		category: builder.category,
 		action:   builder.action,
 		label:    builder.label,
 		property: builder.property,
 		value:    builder.value,
 	}
-}
 
-func (builder *EventBuilder) isValid() error {
-	if err := builder.category.IsValid(); err != nil {
-		return stacktrace.Propagate(err, "Invalid category")
+	if err := event.IsValid(); err != nil {
+		return nil, stacktrace.Propagate(err, "An error occurred validating the event '%+v'", event)
 	}
 
-	if err := builder.action.IsValidForCategory(builder.category); err != nil {
-		return stacktrace.Propagate(err, "Invalid action")
-	}
-
-	return nil
+	return event, nil
 }
