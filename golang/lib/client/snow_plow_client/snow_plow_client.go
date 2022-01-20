@@ -31,6 +31,7 @@ var spOptionCallback = func(successCount []sp.CallbackResult, failureCount []sp.
 
 type SnowPlowClient struct {
 	tracker *sp.Tracker
+	enableTracking bool
 }
 
 func NewSnowPlowClient(source metrics_source.Source, userId string) (*SnowPlowClient, error) {
@@ -55,10 +56,15 @@ func NewSnowPlowClient(source metrics_source.Source, userId string) (*SnowPlowCl
 		sp.OptionAppId(string(source)),
 	)
 
-	return &SnowPlowClient{tracker: tracker}, nil
+	return &SnowPlowClient{tracker: tracker, enableTracking: true}, nil
 }
 
-func (client SnowPlowClient) Track(event *event.Event) error {
+func (client *SnowPlowClient) Track(event *event.Event) error {
+
+	if !client.enableTracking {
+		logrus.Debugf("SnowPlow client tracking is disable")
+		return nil
+	}
 
 	if err := event.IsValid(); err != nil {
 		return stacktrace.Propagate(err, "Invalid event")
@@ -80,3 +86,8 @@ func (client SnowPlowClient) Track(event *event.Event) error {
 
 	return nil
 }
+
+func (client *SnowPlowClient) DisableTracking() {
+	client.enableTracking = false
+}
+
