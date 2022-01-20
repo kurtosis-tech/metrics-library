@@ -23,7 +23,7 @@ var spOptionCallback = func(successCount []sp.CallbackResult, failureCount []sp.
 		logrus.Debugf("SnowPlow emitter succes count: %v", result.Count)
 		logrus.Debugf("SnowPlow emitter succes status: %v", result.Status)
 	}
-	for _, result := range successCount {
+	for _, result := range failureCount {
 		logrus.Debugf("SnowPlow emitter failure count: %v", result.Count)
 		logrus.Debugf("SnowPlow emitter failure status: %v", result.Status)
 	}
