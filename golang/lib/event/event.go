@@ -15,20 +15,10 @@ type Event struct {
 	//A property associated with the object of the action (e.g. partitioning-enabled)
 	property string
 
-	//A value associated with the event/action (in most cases it will be ignored because 
-	//we are going to track individual events, such as: create enclave, only creates 1 enclave 
+	//A value associated with the event/action (in most cases it will be ignored because
+	//we are going to track individual events, such as: create enclave, only creates 1 enclave
 	//load module, only loads 1 module. But could be the case that we want so send a value)
 	value float64
-}
-
-func NewEvent(category Category, action Action, label string, property string, value float64) (*Event, error) {
-	event := &Event{category: category, action: action, label: label, property: property, value: value}
-
-	if err := event.IsValid(); err != nil {
-		return nil, stacktrace.Propagate(err, "Invalid event")
-	}
-
-	return event, nil
 }
 
 func (event *Event) GetCategory() Category {
@@ -59,13 +49,64 @@ func (event *Event) GetValue() float64 {
 	return event.value
 }
 
-//IsValid return nil if the event is valid
-func (event *Event) IsValid() error {
-	if err := event.category.IsValid(); err != nil {
+// ====================================================================================================
+//                                      Builder
+// ====================================================================================================
+type EventBuilder struct {
+	category Category
+	action   Action
+	label    string
+	property string
+	value    float64
+}
+
+func NewEventBuilder(category Category, action Action) (*EventBuilder, error) {
+	eventBuilder := &EventBuilder{
+		category: category,
+		action:   action,
+		label:    "",
+		property: "",
+		value:    0,
+	}
+
+	if err := eventBuilder.isValid(); err != nil {
+		return nil, stacktrace.Propagate(err, "Invalid event")
+	}
+
+	return eventBuilder, nil
+}
+
+func (builder *EventBuilder) WithLabel(label string) *EventBuilder {
+	builder.label = label
+	return builder
+}
+
+func (builder *EventBuilder) WithProperty(property string) *EventBuilder {
+	builder.property = property
+	return builder
+}
+
+func (builder *EventBuilder) WithValue(value float64) *EventBuilder {
+	builder.value = value
+	return builder
+}
+
+func (builder *EventBuilder) Build() *Event {
+	return &Event{
+		category: builder.category,
+		action:   builder.action,
+		label:    builder.label,
+		property: builder.property,
+		value:    builder.value,
+	}
+}
+
+func (builder *EventBuilder) isValid() error {
+	if err := builder.category.IsValid(); err != nil {
 		return stacktrace.Propagate(err, "Invalid category")
 	}
 
-	if err := event.action.IsValidForCategory(event.category); err != nil {
+	if err := builder.action.IsValidForCategory(builder.category); err != nil {
 		return stacktrace.Propagate(err, "Invalid action")
 	}
 
