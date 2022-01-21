@@ -16,6 +16,9 @@ const (
 	//for Kurt-Engine and Kurt-API sources is they run in KurtosisSAS
 	//Available values https://github.com/snowplow/enrich/issues/450
 	spDefaultPlatform = "pc"
+
+	yesStr = "yes"
+	noStr = "no"
 )
 
 var spOptionCallback = func(successCount []sp.CallbackResult, failureCount []sp.CallbackResult) {
@@ -59,7 +62,34 @@ func NewSnowPlowClient(source metrics_source.Source, userId string) (*SnowPlowCl
 	return &SnowPlowClient{tracker: tracker, enableTracking: true}, nil
 }
 
-func (client *SnowPlowClient) Track(event *event.Event) error {
+func (client *SnowPlowClient) TrackUserAcceptSendingMetrics(userAcceptSendingMetrics bool) error {
+
+	var metricsLabel string
+	if userAcceptSendingMetrics{
+		metricsLabel = yesStr
+	} else {
+		metricsLabel = noStr
+	}
+
+	metricsEvent, err := event.NewEventBuilder(event.InstallCategory, event.ConsentAction).
+		WithLabel(metricsLabel).
+		Build()
+	if err != nil {
+		return stacktrace.Propagate(err, "An error occurred creating a new metrics event")
+	}
+
+	if err := client.track(metricsEvent); err != nil {
+		return stacktrace.Propagate(err, "An error occurred tracking metrics event &+v", metricsEvent)
+	}
+
+	if !userAcceptSendingMetrics {
+		client.DisableTracking()
+	}
+
+	return nil
+}
+
+func (client *SnowPlowClient) track(event *event.Event) error {
 
 	if !client.enableTracking {
 		logrus.Debugf("SnowPlow client tracking is disable")
