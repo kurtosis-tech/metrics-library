@@ -1,6 +1,7 @@
 package snow_plow_client
 
 import (
+	"github.com/kurtosis-tech/metrics-library/golang/lib/client/common"
 	"github.com/kurtosis-tech/metrics-library/golang/lib/event"
 	metrics_source "github.com/kurtosis-tech/metrics-library/golang/lib/source"
 	"github.com/kurtosis-tech/stacktrace"
@@ -73,6 +74,55 @@ func (client *SnowPlowClient) TrackUserAcceptSendingMetrics(userAcceptSendingMet
 
 	metricsEvent, err := event.NewEventBuilder(event.InstallCategory, event.ConsentAction).
 		WithLabel(metricsLabel).
+		Build()
+	if err != nil {
+		return stacktrace.Propagate(err, "An error occurred creating a new metrics event")
+	}
+
+	if err := client.track(metricsEvent); err != nil {
+		return stacktrace.Propagate(err, "An error occurred tracking metrics event &+v", metricsEvent)
+	}
+
+	return nil
+}
+
+func (client *SnowPlowClient) TrackCreateEnclave(enclaveName string) error {
+
+	hashedEnclaveName := common.HashString(enclaveName)
+
+	metricsEvent, err := event.NewEventBuilder(event.EnclaveCategory, event.CreateAction).
+		WithLabel(hashedEnclaveName).
+		Build()
+	if err != nil {
+		return stacktrace.Propagate(err, "An error occurred creating a new metrics event")
+	}
+
+	if err := client.track(metricsEvent); err != nil {
+		return stacktrace.Propagate(err, "An error occurred tracking metrics event &+v", metricsEvent)
+	}
+
+	return nil
+}
+
+func (client *SnowPlowClient) TrackStopEnclave() error {
+
+	metricsEvent, err := event.NewEventBuilder(event.EnclaveCategory, event.StopAction).
+		Build()
+	if err != nil {
+		return stacktrace.Propagate(err, "An error occurred creating a new metrics event")
+	}
+
+	if err := client.track(metricsEvent); err != nil {
+		return stacktrace.Propagate(err, "An error occurred tracking metrics event &+v", metricsEvent)
+	}
+
+	return nil
+}
+
+
+func (client *SnowPlowClient) TrackDestroyEnclave() error {
+
+	metricsEvent, err := event.NewEventBuilder(event.EnclaveCategory, event.DestroyAction).
 		Build()
 	if err != nil {
 		return stacktrace.Propagate(err, "An error occurred creating a new metrics event")

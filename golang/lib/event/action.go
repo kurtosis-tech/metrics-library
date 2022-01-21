@@ -4,8 +4,7 @@ import "github.com/kurtosis-tech/stacktrace"
 
 const (
 	CreateAction  Action = "create"
-	RemoveAction  Action = "remove"
-	StartAction   Action = "start"
+	DestroyAction Action = "destroy"
 	StopAction    Action = "stop"
 	LoadAction    Action = "load"
 	UnloadAction  Action = "unload"
@@ -13,19 +12,17 @@ const (
 )
 
 var allValidActions = map[Action]bool{
-	CreateAction: true,
-	RemoveAction: true,
-	StartAction:  true,
-	StopAction:   true,
-	LoadAction:   true,
-	UnloadAction: true,
+	CreateAction:  true,
+	DestroyAction: true,
+	StopAction:    true,
+	LoadAction:    true,
+	UnloadAction:  true,
 }
 
 var allValidEnclaveActions = map[Action]bool{
-	CreateAction: true,
-	RemoveAction: true,
-	StartAction:  true,
-	StopAction:   true,
+	CreateAction:  true,
+	DestroyAction: true,
+	StopAction:    true,
 }
 
 var allValidModuleActions = map[Action]bool{
