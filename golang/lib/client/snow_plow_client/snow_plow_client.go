@@ -86,12 +86,12 @@ func (client *SnowPlowClient) TrackUserAcceptSendingMetrics(userAcceptSendingMet
 	return nil
 }
 
-func (client *SnowPlowClient) TrackCreateEnclave(enclaveName string) error {
+func (client *SnowPlowClient) TrackCreateEnclave(enclaveId string) error {
 
-	hashedEnclaveName := common.HashString(enclaveName)
+	hashedEnclaveId := common.HashString(enclaveId)
 
 	metricsEvent, err := event.NewEventBuilder(event.EnclaveCategory, event.CreateAction).
-		WithLabel(hashedEnclaveName).
+		WithLabel(hashedEnclaveId).
 		Build()
 	if err != nil {
 		return stacktrace.Propagate(err, "An error occurred creating a new metrics event")
@@ -123,6 +123,21 @@ func (client *SnowPlowClient) TrackStopEnclave() error {
 func (client *SnowPlowClient) TrackDestroyEnclave() error {
 
 	metricsEvent, err := event.NewEventBuilder(event.EnclaveCategory, event.DestroyAction).
+		Build()
+	if err != nil {
+		return stacktrace.Propagate(err, "An error occurred creating a new metrics event")
+	}
+
+	if err := client.track(metricsEvent); err != nil {
+		return stacktrace.Propagate(err, "An error occurred tracking metrics event &+v", metricsEvent)
+	}
+
+	return nil
+}
+
+func (client *SnowPlowClient) TrackCleanEnclave() error {
+
+	metricsEvent, err := event.NewEventBuilder(event.EnclaveCategory, event.CleanAction).
 		Build()
 	if err != nil {
 		return stacktrace.Propagate(err, "An error occurred creating a new metrics event")

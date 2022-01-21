@@ -6,6 +6,7 @@ const (
 	CreateAction  Action = "create"
 	DestroyAction Action = "destroy"
 	StopAction    Action = "stop"
+	CleanAction   Action = "clean"
 	LoadAction    Action = "load"
 	UnloadAction  Action = "unload"
 	ConsentAction Action = "consent"
@@ -15,14 +16,17 @@ var allValidActions = map[Action]bool{
 	CreateAction:  true,
 	DestroyAction: true,
 	StopAction:    true,
+	CleanAction:   true,
 	LoadAction:    true,
 	UnloadAction:  true,
+	ConsentAction: true,
 }
 
 var allValidEnclaveActions = map[Action]bool{
 	CreateAction:  true,
 	DestroyAction: true,
 	StopAction:    true,
+	CleanAction:   true,
 }
 
 var allValidModuleActions = map[Action]bool{

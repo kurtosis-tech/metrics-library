@@ -5,4 +5,5 @@ type MetricsClient interface {
 	TrackCreateEnclave(enclaveName string) error
 	TrackStopEnclave() error
 	TrackDestroyEnclave() error
+	TrackCleanEnclave() error
 }
