@@ -1,12 +1,12 @@
 package common
 
 import (
-	"crypto/sha1"
+	"crypto/sha256"
 	"fmt"
 )
 
 func HashString(value string) string {
-	hash := sha1.New()
+	hash := sha256.New()
 
 	hash.Write([]byte(value))
 
