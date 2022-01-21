@@ -82,19 +82,10 @@ func (client *SnowPlowClient) TrackUserAcceptSendingMetrics(userAcceptSendingMet
 		return stacktrace.Propagate(err, "An error occurred tracking metrics event &+v", metricsEvent)
 	}
 
-	if !userAcceptSendingMetrics {
-		client.DisableTracking()
-	}
-
 	return nil
 }
 
 func (client *SnowPlowClient) track(event *event.Event) error {
-
-	if !client.enableTracking {
-		logrus.Debugf("SnowPlow client tracking is disable")
-		return nil
-	}
 
 	if err := event.IsValid(); err != nil {
 		return stacktrace.Propagate(err, "Invalid event")
@@ -116,8 +107,3 @@ func (client *SnowPlowClient) track(event *event.Event) error {
 
 	return nil
 }
-
-func (client *SnowPlowClient) DisableTracking() {
-	client.enableTracking = false
-}
-

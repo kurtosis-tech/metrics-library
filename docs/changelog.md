@@ -7,6 +7,8 @@
 * Added `Category` which represents an event's category
 * Added `Action` which represents an event's action
 * Added `Source` type to define the metrics application source
+* Added metrics client creator func to create default metrics provider or and specific metrics provider
+* Added `DoNothingClient` which is and implementation of the `MetricsClient` used when users decide reject send metrics
 
 # 0.1.0
 * Initial commit
