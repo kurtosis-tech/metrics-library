@@ -22,6 +22,9 @@ type SegmentClient struct {
 }
 
 func NewSegmentClient(source metrics_source.Source, userId string) (*SegmentClient, error) {
+	if err := source.IsValid(); err != nil {
+		return nil, stacktrace.Propagate(err, "Invalid source")
+	}
 
 	client := analytics.New(accountWriteKey)
 
