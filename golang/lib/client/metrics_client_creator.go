@@ -2,17 +2,19 @@ package client
 
 import (
 	"github.com/kurtosis-tech/metrics-library/golang/lib/client/do_nothing_client"
+	"github.com/kurtosis-tech/metrics-library/golang/lib/client/segment_client"
 	"github.com/kurtosis-tech/metrics-library/golang/lib/client/snow_plow_client"
 	"github.com/kurtosis-tech/metrics-library/golang/lib/source"
 	"github.com/kurtosis-tech/stacktrace"
 )
 
-func CreateDefaultMetricsClient(source source.Source, userId string, usserAcceptSendingMetrics bool) (MetricsClient, error) {
+func CreateDefaultMetricsClient(source source.Source, userId string, userAcceptSendingMetrics bool) (MetricsClient, error) {
 
 	metricsProvider := DoNoting
 
-	if usserAcceptSendingMetrics{
-		metricsProvider = SnowPlow
+	if userAcceptSendingMetrics{
+		//Setting default Metrics Client
+		metricsProvider = Segment
 	}
 
 	return CreateMetricsClient(source, userId, metricsProvider)
@@ -21,6 +23,12 @@ func CreateDefaultMetricsClient(source source.Source, userId string, usserAccept
 func CreateMetricsClient(source source.Source, userId string, metricsProvider MetricsClientProvider) (MetricsClient, error) {
 
 	switch metricsProvider {
+	case Segment:
+		metricsClient, err := segment_client.NewSegmentClient(source, userId)
+		if err != nil {
+			return nil, stacktrace.Propagate(err, "An error occurred creating Segment metrics client")
+		}
+		return metricsClient, nil
 	case SnowPlow:
 		metricsClient, err := snow_plow_client.NewSnowPlowClient(source, userId)
 		if err != nil {
@@ -34,4 +42,3 @@ func CreateMetricsClient(source source.Source, userId string, metricsProvider Me
 		return nil, stacktrace.NewError("Unrecognized metrics provider '%v'", metricsProvider)
 	}
 }
-

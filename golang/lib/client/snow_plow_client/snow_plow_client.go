@@ -35,7 +35,6 @@ var spOptionCallback = func(successCount []sp.CallbackResult, failureCount []sp.
 
 type SnowPlowClient struct {
 	tracker *sp.Tracker
-	enableTracking bool
 }
 
 func NewSnowPlowClient(source metrics_source.Source, userId string) (*SnowPlowClient, error) {
@@ -60,7 +59,7 @@ func NewSnowPlowClient(source metrics_source.Source, userId string) (*SnowPlowCl
 		sp.OptionAppId(string(source)),
 	)
 
-	return &SnowPlowClient{tracker: tracker, enableTracking: true}, nil
+	return &SnowPlowClient{tracker: tracker}, nil
 }
 
 func (client *SnowPlowClient) TrackUserAcceptSendingMetrics(userAcceptSendingMetrics bool) error {
