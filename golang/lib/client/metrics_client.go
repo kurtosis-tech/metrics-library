@@ -3,8 +3,8 @@ package client
 type MetricsClient interface {
 	TrackUserAcceptSendingMetrics(userAcceptSendingMetrics bool) error
 	TrackCreateEnclave(enclaveId string) error
-	TrackStopEnclave() error  //TODO check if we can send the enclaveID
-	TrackDestroyEnclave() error //TODO check if we can send the enclaveID
-	TrackCleanEnclave() error //TODO check if we can send the enclaveID
+	TrackStopEnclave(enclaveId string) error
+	TrackDestroyEnclave(enclaveId string) error
+	TrackCleanEnclave(shouldCleanAll bool) error
 	//TODO kurtosis'module tracking
 }

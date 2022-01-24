@@ -1,7 +1,6 @@
 package segment_client
 
 import (
-	"github.com/kurtosis-tech/metrics-library/golang/lib/client/common"
 	"github.com/kurtosis-tech/metrics-library/golang/lib/event"
 	metrics_source "github.com/kurtosis-tech/metrics-library/golang/lib/source"
 	"github.com/kurtosis-tech/stacktrace"
@@ -26,7 +25,8 @@ func NewSegmentClient(source metrics_source.Source, userId string) (*SegmentClie
 
 	client := analytics.New(accountWriteKey)
 
-	//this call should be executed only the first time and also if some traits change
+	//We should uncomment this code if we want to create an event to identify the user
+	//every time the client is created, it will be add a new row in SF "Identifies" table
 	/*
 	if err := client.Enqueue(analytics.Identify{
 		UserId: userId,
@@ -34,26 +34,19 @@ func NewSegmentClient(source metrics_source.Source, userId string) (*SegmentClie
 		return nil, stacktrace.Propagate(err, "An error occurred enqueuing a new identify event in Segment client's queue")
 	}*/
 
-	return &SegmentClient{client: client, source: source, userID: "Leo-test"}, nil
+	return &SegmentClient{client: client, source: source, userID: userId}, nil
 }
 
 
 func (segment *SegmentClient) TrackUserAcceptSendingMetrics(userAcceptSendingMetrics bool) error {
 
-	var metricsLabel string
-	if userAcceptSendingMetrics{
-		metricsLabel = yesStr
-	} else {
-		metricsLabel = noStr
+	newEvent, err := event.NewUserAcceptSendingMetricsEvent(userAcceptSendingMetrics)
+	if err != nil {
+		return stacktrace.Propagate(err, "An error occurred creating a new user accept sending metrics event")
 	}
 
-	if err := segment.client.Enqueue(analytics.Track{
-		Event:  string(event.InstallCategory) + "-" + string(event.ConsentAction),
-		UserId: segment.userID,
-		Properties: analytics.NewProperties().
-			Set("user-accept-sending-metrics", metricsLabel),
-	}); err != nil {
-		return stacktrace.Propagate(err, "An error occurred enqueuing a new event in Segment client's queue")
+	if err := segment.track(newEvent); err != nil {
+		return stacktrace.Propagate(err, "An error occurred tracking user accept sending metrics event")
 	}
 
 	return nil
@@ -61,44 +54,62 @@ func (segment *SegmentClient) TrackUserAcceptSendingMetrics(userAcceptSendingMet
 
 func (segment *SegmentClient) TrackCreateEnclave(enclaveId string) error {
 
-	hashedEnclaveId := common.HashString(enclaveId)
+	newEvent, err := event.NewCreateEnclaveEvent(enclaveId)
+	if err != nil {
+		return stacktrace.Propagate(err, "An error occurred creating a new create enclave event")
+	}
 
+	if err := segment.track(newEvent); err != nil {
+		return stacktrace.Propagate(err, "An error occurred tracking create enclave event")
+	}
+
+	return nil
+}
+
+func (segment *SegmentClient) TrackStopEnclave(enclaveId string) error {
+	newEvent, err := event.NewStopEnclaveEvent(enclaveId)
+	if err != nil {
+		return stacktrace.Propagate(err, "An error occurred creating a new stop enclave event")
+	}
+
+	if err := segment.track(newEvent); err != nil {
+		return stacktrace.Propagate(err, "An error occurred tracking stop enclave event")
+	}
+
+	return nil
+}
+
+func (segment *SegmentClient) TrackDestroyEnclave(enclaveId string) error {
+	newEvent, err := event.NewDestroyEnclaveEvent(enclaveId)
+	if err != nil {
+		return stacktrace.Propagate(err, "An error occurred creating a new destroy enclave event")
+	}
+
+	if err := segment.track(newEvent); err != nil {
+		return stacktrace.Propagate(err, "An error occurred tracking destroy enclave event")
+	}
+	return nil
+}
+
+func (segment *SegmentClient) TrackCleanEnclave(shouldCleanAll bool) error {
+	newEvent, err := event.NewCleanEnclaveEvent(shouldCleanAll)
+	if err != nil {
+		return stacktrace.Propagate(err, "An error occurred creating a new clean enclave event")
+	}
+
+	if err := segment.track(newEvent); err != nil {
+		return stacktrace.Propagate(err, "An error occurred tracking clean enclave event")
+	}
+
+	return nil
+}
+
+func (segment *SegmentClient) track(event *event.Event) error {
 	if err := segment.client.Enqueue(analytics.Track{
-		Event:  string(event.EnclaveCategory) + "-" + string(event.CreateAction),
+		Event:  event.GetName(),
 		UserId: segment.userID,
 		Properties: analytics.NewProperties().
-			Set("enclave-id", hashedEnclaveId),
-	}); err != nil {
-		return stacktrace.Propagate(err, "An error occurred enqueuing a new event in Segment client's queue")
-	}
-
-	return nil
-}
-
-func (segment *SegmentClient) TrackStopEnclave() error {
-	if err := segment.client.Enqueue(analytics.Track{
-		Event:  string(event.EnclaveCategory) + "-" + string(event.StopAction),
-		UserId: segment.userID,
-	}); err != nil {
-		return stacktrace.Propagate(err, "An error occurred enqueuing a new event in Segment client's queue")
-	}
-	return nil
-}
-
-func (segment *SegmentClient) TrackDestroyEnclave() error {
-	if err := segment.client.Enqueue(analytics.Track{
-		Event:  string(event.EnclaveCategory) + "-" + string(event.DestroyAction),
-		UserId: segment.userID,
-	}); err != nil {
-		return stacktrace.Propagate(err, "An error occurred enqueuing a new event in Segment client's queue")
-	}
-	return nil
-}
-
-func (segment *SegmentClient) TrackCleanEnclave() error {
-	if err := segment.client.Enqueue(analytics.Track{
-		Event:  string(event.EnclaveCategory) + "-" + string(event.CleanAction),
-		UserId: segment.userID,
+			Set(event.GetPropertyKey(), event.GetPropertyValue()),
 	}); err != nil {
 		return stacktrace.Propagate(err, "An error occurred enqueuing a new event in Segment client's queue")
 	}

@@ -1,7 +1,6 @@
 package snow_plow_client
 
 import (
-	"github.com/kurtosis-tech/metrics-library/golang/lib/client/common"
 	"github.com/kurtosis-tech/metrics-library/golang/lib/event"
 	metrics_source "github.com/kurtosis-tech/metrics-library/golang/lib/source"
 	"github.com/kurtosis-tech/stacktrace"
@@ -62,98 +61,68 @@ func NewSnowPlowClient(source metrics_source.Source, userId string) (*SnowPlowCl
 	return &SnowPlowClient{tracker: tracker}, nil
 }
 
-func (client *SnowPlowClient) TrackUserAcceptSendingMetrics(userAcceptSendingMetrics bool) error {
+func (snowPlow *SnowPlowClient) TrackUserAcceptSendingMetrics(userAcceptSendingMetrics bool) error {
 
-	var metricsLabel string
-	if userAcceptSendingMetrics{
-		metricsLabel = yesStr
-	} else {
-		metricsLabel = noStr
-	}
-
-	metricsEvent, err := event.NewEventBuilder(event.InstallCategory, event.ConsentAction).
-		WithLabel(metricsLabel).
-		Build()
+	newEvent, err := event.NewUserAcceptSendingMetricsEvent(userAcceptSendingMetrics)
 	if err != nil {
-		return stacktrace.Propagate(err, "An error occurred creating a new metrics event")
+		return stacktrace.Propagate(err, "An error occurred creating a new user accept sending metrics event")
 	}
 
-	if err := client.track(metricsEvent); err != nil {
-		return stacktrace.Propagate(err, "An error occurred tracking metrics event &+v", metricsEvent)
-	}
+	snowPlow.track(newEvent)
 
 	return nil
 }
 
-func (client *SnowPlowClient) TrackCreateEnclave(enclaveId string) error {
+func (snowPlow *SnowPlowClient) TrackCreateEnclave(enclaveId string) error {
 
-	hashedEnclaveId := common.HashString(enclaveId)
-
-	metricsEvent, err := event.NewEventBuilder(event.EnclaveCategory, event.CreateAction).
-		WithLabel(hashedEnclaveId).
-		Build()
+	newEvent, err := event.NewCreateEnclaveEvent(enclaveId)
 	if err != nil {
-		return stacktrace.Propagate(err, "An error occurred creating a new metrics event")
+		return stacktrace.Propagate(err, "An error occurred creating a new create enclave event")
 	}
 
-	if err := client.track(metricsEvent); err != nil {
-		return stacktrace.Propagate(err, "An error occurred tracking metrics event &+v", metricsEvent)
-	}
+	snowPlow.track(newEvent)
 
 	return nil
 }
 
-func (client *SnowPlowClient) TrackStopEnclave() error {
+func (snowPlow *SnowPlowClient) TrackStopEnclave(enclaveId string) error {
 
-	metricsEvent, err := event.NewEventBuilder(event.EnclaveCategory, event.StopAction).
-		Build()
+	newEvent, err := event.NewStopEnclaveEvent(enclaveId)
 	if err != nil {
-		return stacktrace.Propagate(err, "An error occurred creating a new metrics event")
+		return stacktrace.Propagate(err, "An error occurred creating a new stop enclave event")
 	}
 
-	if err := client.track(metricsEvent); err != nil {
-		return stacktrace.Propagate(err, "An error occurred tracking metrics event &+v", metricsEvent)
-	}
+	snowPlow.track(newEvent)
 
 	return nil
 }
 
 
-func (client *SnowPlowClient) TrackDestroyEnclave() error {
+func (snowPlow *SnowPlowClient) TrackDestroyEnclave(enclaveId string) error {
 
-	metricsEvent, err := event.NewEventBuilder(event.EnclaveCategory, event.DestroyAction).
-		Build()
+	newEvent, err := event.NewDestroyEnclaveEvent(enclaveId)
 	if err != nil {
-		return stacktrace.Propagate(err, "An error occurred creating a new metrics event")
+		return stacktrace.Propagate(err, "An error occurred creating a new destroy enclave event")
 	}
 
-	if err := client.track(metricsEvent); err != nil {
-		return stacktrace.Propagate(err, "An error occurred tracking metrics event &+v", metricsEvent)
-	}
+	snowPlow.track(newEvent)
 
 	return nil
 }
 
-func (client *SnowPlowClient) TrackCleanEnclave() error {
+func (snowPlow *SnowPlowClient) TrackCleanEnclave(shouldCleanAll bool) error {
 
-	metricsEvent, err := event.NewEventBuilder(event.EnclaveCategory, event.CleanAction).
-		Build()
+	newEvent, err := event.NewCleanEnclaveEvent(shouldCleanAll)
 	if err != nil {
-		return stacktrace.Propagate(err, "An error occurred creating a new metrics event")
+		return stacktrace.Propagate(err, "An error occurred creating a new clean enclave event")
 	}
 
-	if err := client.track(metricsEvent); err != nil {
-		return stacktrace.Propagate(err, "An error occurred tracking metrics event &+v", metricsEvent)
-	}
+	snowPlow.track(newEvent)
 
 	return nil
 }
 
-func (client *SnowPlowClient) track(event *event.Event) error {
-
-	if err := event.IsValid(); err != nil {
-		return stacktrace.Propagate(err, "Invalid event")
-	}
+func (snowPlow *SnowPlowClient) track(event *event.Event) error {
 
 	//We are using StructuredEvent types because we can match current Kurtosis Events with this type
 	//of events, we also could use SelfDescribing events type if the Structured is not enough
@@ -161,13 +130,11 @@ func (client *SnowPlowClient) track(event *event.Event) error {
 	//https://docs.snowplowanalytics.com/docs/understanding-tracking-design/out-of-the-box-vs-custom-events-and-entities/
 	//https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/golang-tracker/tracking-specific-events/#struct-event
 	//https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/javascript-trackers/javascript-tracker/javascript-tracker-v2/tracking-specific-events/#tracking-custom-structured-events
-	client.tracker.TrackStructEvent(sp.StructuredEvent{
-		Category: sp.NewString(event.GetCategoryString()),
-		Action:   sp.NewString(event.GetActionString()),
-		Property: sp.NewString(event.GetProperty()),
-		Label:    sp.NewString(event.GetLabel()),
-		Value:    sp.NewFloat64(event.GetValue()),
+	snowPlow.tracker.TrackStructEvent(sp.StructuredEvent{
+		Category: sp.NewString(event.GetCategory()),
+		Action:   sp.NewString(event.GetAction()),
+		Label:    sp.NewString(event.GetPropertyKey()),
+		Property: sp.NewString(event.GetPropertyValue()),
 	})
-
 	return nil
 }
