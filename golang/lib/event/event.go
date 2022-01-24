@@ -55,13 +55,13 @@ func (event *Event) GetPropertyValue() string {
 func (event *Event) IsValid() error {
 	category := strings.TrimSpace(event.category)
 
-	if category != "" {
+	if category == "" {
 		return stacktrace.NewError("Event's category can not be empty string")
 	}
 
 	action := strings.TrimSpace(event.action)
 
-	if action != "" {
+	if action == "" {
 		return stacktrace.NewError("Event's action can not be empty string")
 	}
 

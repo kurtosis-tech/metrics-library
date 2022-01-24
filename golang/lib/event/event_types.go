@@ -110,7 +110,7 @@ func NewCleanEnclaveEvent(shouldCleanAll bool) (*Event, error) {
 func validateEnclaveIdAndGetHashedValue(enclaveId string) (string, error)  {
 	enclaveId = strings.TrimSpace(enclaveId)
 
-	if enclaveId != "" {
+	if enclaveId == "" {
 		return "", stacktrace.NewError("Enclave ID can not be empty string")
 	}
 
