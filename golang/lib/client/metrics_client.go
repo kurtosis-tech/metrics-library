@@ -6,5 +6,7 @@ type MetricsClient interface {
 	TrackStopEnclave(enclaveId string) error
 	TrackDestroyEnclave(enclaveId string) error
 	TrackCleanEnclave(shouldCleanAll bool) error
-	//TODO kurtosis'module tracking
+	TrackLoadModule(moduleId string) error
+	TrackExecuteModule(moduleId string) error
+	TrackUnloadModule(moduleId string) error
 }

@@ -15,12 +15,14 @@ const (
 	//We are following these naming conventions for event's data
 	//https://segment.com/docs/getting-started/04-full-install/#event-naming-best-practices
 	enclaveIDPropertyKey = "enclave_id"
-	userAcceptSendingMetricsKey = "user-accept-sending-metrics"
-	shouldCleanAllPropertyKey = "should-clean-all"
+	moduleIDPropertyKey = "module_id"
+	userAcceptSendingMetricsKey = "user_accept_sending_metrics"
+	shouldCleanAllPropertyKey = "should_clean_all"
 
 	//Categories
 	installCategory = "Install"
 	enclaveCategory = "Enclave"
+	moduleCategory = "Module"
 
 	//Actions
 	consentAction = "Consent"
@@ -28,6 +30,9 @@ const (
 	stopAction = "Stop"
 	destroyAction = "Destroy"
 	cleanAction = "Clean"
+	loadAction = "Load"
+	unloadAction = "Unload"
+	executeAction = "Execute"
 
 )
 
@@ -99,7 +104,31 @@ func NewCleanEnclaveEvent(shouldCleanAll bool) (*Event, error) {
 
 	event, err := newEvent(enclaveCategory, cleanAction, shouldCleanAllPropertyKey, metricsValue)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "An error occurred creating a clean enclave event")
+		return nil, stacktrace.Propagate(err, "An error occurred creating a new clean enclave event")
+	}
+	return event, nil
+}
+
+func NewLoadModuleEvent(moduleId string) (*Event, error) {
+	event, err := newEvent(moduleCategory, loadAction, moduleIDPropertyKey, moduleId)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "An error occurred creating a new load module event")
+	}
+	return event, nil
+}
+
+func NewUnloadModuleEvent(moduleId string) (*Event, error) {
+	event, err := newEvent(moduleCategory, unloadAction, moduleIDPropertyKey, moduleId)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "An error occurred creating a new unload module event")
+	}
+	return event, nil
+}
+
+func NewExecuteModuleEvent(moduleId string) (*Event, error) {
+	event, err := newEvent(moduleCategory, executeAction, moduleIDPropertyKey, moduleId)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "An error occurred creating a new execute module event")
 	}
 	return event, nil
 }

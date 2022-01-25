@@ -122,6 +122,45 @@ func (snowPlow *SnowPlowClient) TrackCleanEnclave(shouldCleanAll bool) error {
 	return nil
 }
 
+func (snowPlow *SnowPlowClient) TrackLoadModule(moduleId string) error {
+
+	newEvent, err := event.NewLoadModuleEvent(moduleId)
+	if err != nil {
+		return stacktrace.Propagate(err, "An error occurred creating a new load module event")
+	}
+
+	snowPlow.track(newEvent)
+
+	return nil
+}
+
+func (snowPlow *SnowPlowClient) TrackUnloadModule(moduleId string) error {
+
+	newEvent, err := event.NewUnloadModuleEvent(moduleId)
+	if err != nil {
+		return stacktrace.Propagate(err, "An error occurred creating a new unload module event")
+	}
+
+	snowPlow.track(newEvent)
+
+	return nil
+}
+
+func (snowPlow *SnowPlowClient) TrackExecuteModule(moduleId string) error {
+
+	newEvent, err := event.NewExecuteModuleEvent(moduleId)
+	if err != nil {
+		return stacktrace.Propagate(err, "An error occurred creating a new execute module event")
+	}
+
+	snowPlow.track(newEvent)
+
+	return nil
+}
+
+// ====================================================================================================
+// 									   Private helper methods
+// ====================================================================================================
 func (snowPlow *SnowPlowClient) track(event *event.Event) error {
 
 	//We are using StructuredEvent types because we can match current Kurtosis Events with this type

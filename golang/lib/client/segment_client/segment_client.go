@@ -107,6 +107,48 @@ func (segment *SegmentClient) TrackCleanEnclave(shouldCleanAll bool) error {
 	return nil
 }
 
+func (segment *SegmentClient) TrackLoadModule(moduleId string) error {
+	newEvent, err := event.NewLoadModuleEvent(moduleId)
+	if err != nil {
+		return stacktrace.Propagate(err, "An error occurred creating a new load module event")
+	}
+
+	if err := segment.track(newEvent); err != nil {
+		return stacktrace.Propagate(err, "An error occurred tracking load module event")
+	}
+
+	return nil
+}
+
+func (segment *SegmentClient) TrackUnloadModule(moduleId string) error {
+	newEvent, err := event.NewUnloadModuleEvent(moduleId)
+	if err != nil {
+		return stacktrace.Propagate(err, "An error occurred creating a new unload module event")
+	}
+
+	if err := segment.track(newEvent); err != nil {
+		return stacktrace.Propagate(err, "An error occurred tracking unload module event")
+	}
+
+	return nil
+}
+
+func (segment *SegmentClient) TrackExecuteModule(moduleId string) error {
+	newEvent, err := event.NewExecuteModuleEvent(moduleId)
+	if err != nil {
+		return stacktrace.Propagate(err, "An error occurred creating a new execute module event")
+	}
+
+	if err := segment.track(newEvent); err != nil {
+		return stacktrace.Propagate(err, "An error occurred tracking execute module event")
+	}
+
+	return nil
+}
+
+// ====================================================================================================
+// 									   Private helper methods
+// ====================================================================================================
 func (segment *SegmentClient) track(event *event.Event) error {
 	if err := segment.client.Enqueue(analytics.Track{
 		Event:  event.GetName(),
