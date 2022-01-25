@@ -12,13 +12,20 @@ const (
 	spCollectorURI = "8e280f93-12b7-4610-bd19-a5d7bc9e41dd.app.try-snowplow.com"
 	spProtocol     = "https"
 	spNamespace    = "kurtosistech"
+
 	//Now we are using "pc" as default, but in the future we could use "srv"
 	//for Kurt-Engine and Kurt-API sources is they run in KurtosisSAS
 	//Available values https://github.com/snowplow/enrich/issues/450
 	spDefaultPlatform = "pc"
 
-	yesStr = "yes"
-	noStr = "no"
+	//SnowPlow Application Context JSON Schema URL
+	//It's provided by Iglu (the Snow Plow JSON Schema Repository)
+	//More about Self describing JSON schemas and the Iglu Repository here:
+	//https://docs.snowplowanalytics.com/docs/pipeline-components-and-applications/iglu/
+	applicationContextJSONSchemaURL = "iglu:com.snowplowanalytics.monitoring.batch/application_context/jsonschema/1-0-0"
+
+	nameApplicationContextKey    = "name"
+	versionApplicationContextKey = "version"
 )
 
 var spOptionCallback = func(successCount []sp.CallbackResult, failureCount []sp.CallbackResult) {
@@ -33,10 +40,11 @@ var spOptionCallback = func(successCount []sp.CallbackResult, failureCount []sp.
 }
 
 type SnowPlowClient struct {
-	tracker *sp.Tracker
+	tracker          *sp.Tracker
+	analyticsContext []sp.SelfDescribingJson
 }
 
-func NewSnowPlowClient(source metrics_source.Source, userId string) (*SnowPlowClient, error) {
+func NewSnowPlowClient(source metrics_source.Source, sourceVersion string, userId string) (*SnowPlowClient, error) {
 	if err := source.IsValid(); err != nil {
 		return nil, stacktrace.Propagate(err, "Invalid source")
 	}
@@ -58,7 +66,9 @@ func NewSnowPlowClient(source metrics_source.Source, userId string) (*SnowPlowCl
 		sp.OptionAppId(string(source)),
 	)
 
-	return &SnowPlowClient{tracker: tracker}, nil
+	analyticsContext := newAnalyticsContext(source, sourceVersion)
+
+	return &SnowPlowClient{tracker: tracker, analyticsContext: analyticsContext}, nil
 }
 
 func (snowPlow *SnowPlowClient) TrackUserAcceptSendingMetrics(userAcceptSendingMetrics bool) error {
@@ -96,7 +106,6 @@ func (snowPlow *SnowPlowClient) TrackStopEnclave(enclaveId string) error {
 
 	return nil
 }
-
 
 func (snowPlow *SnowPlowClient) TrackDestroyEnclave(enclaveId string) error {
 
@@ -174,6 +183,21 @@ func (snowPlow *SnowPlowClient) track(event *event.Event) error {
 		Action:   sp.NewString(event.GetAction()),
 		Label:    sp.NewString(event.GetPropertyKey()),
 		Property: sp.NewString(event.GetPropertyValue()),
+		Contexts: snowPlow.analyticsContext,
 	})
 	return nil
+}
+
+func newAnalyticsContext(source metrics_source.Source, sourceVersion string) []sp.SelfDescribingJson {
+
+	data := map[string]string{
+		nameApplicationContextKey:    string(source),
+		versionApplicationContextKey: sourceVersion,
+	}
+
+	applicationContext := sp.InitSelfDescribingJson(applicationContextJSONSchemaURL, data)
+
+	analyticsContext := []sp.SelfDescribingJson{*applicationContext}
+
+	return analyticsContext
 }

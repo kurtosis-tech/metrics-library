@@ -8,7 +8,7 @@ import (
 	"github.com/kurtosis-tech/stacktrace"
 )
 
-func CreateDefaultMetricsClient(source source.Source, userId string, userAcceptSendingMetrics bool) (MetricsClient, error) {
+func CreateDefaultMetricsClient(source source.Source, sourceVersion string, userId string, userAcceptSendingMetrics bool) (MetricsClient, error) {
 
 	metricsProvider := DoNoting
 
@@ -17,20 +17,20 @@ func CreateDefaultMetricsClient(source source.Source, userId string, userAcceptS
 		metricsProvider = Segment
 	}
 
-	return CreateMetricsClient(source, userId, metricsProvider)
+	return CreateMetricsClient(source, sourceVersion, userId, metricsProvider)
 }
 
-func CreateMetricsClient(source source.Source, userId string, metricsProvider MetricsClientProvider) (MetricsClient, error) {
+func CreateMetricsClient(source source.Source, sourceVersion string, userId string, metricsProvider MetricsClientProvider) (MetricsClient, error) {
 
 	switch metricsProvider {
 	case Segment:
-		metricsClient, err := segment_client.NewSegmentClient(source, userId)
+		metricsClient, err := segment_client.NewSegmentClient(source, sourceVersion, userId)
 		if err != nil {
 			return nil, stacktrace.Propagate(err, "An error occurred creating Segment metrics client")
 		}
 		return metricsClient, nil
 	case SnowPlow:
-		metricsClient, err := snow_plow_client.NewSnowPlowClient(source, userId)
+		metricsClient, err := snow_plow_client.NewSnowPlowClient(source, sourceVersion, userId)
 		if err != nil {
 			return nil, stacktrace.Propagate(err, "An error occurred creating SnowPlow metrics client")
 		}

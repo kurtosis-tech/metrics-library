@@ -10,26 +10,23 @@ import (
 const (
 	//Key generated in my lporoli trial account
 	accountWriteKey = "WbfsEYlBdRyaML5adTucEzqBkpQsz4p7"
-
-	yesStr = "yes"
-	noStr = "no"
 )
 
 type SegmentClient struct {
 	client analytics.Client
-	source metrics_source.Source
+	analyticsContext *analytics.Context
 	userID string
 }
 
-func NewSegmentClient(source metrics_source.Source, userId string) (*SegmentClient, error) {
+func NewSegmentClient(source metrics_source.Source, sourceVersion string, userId string) (*SegmentClient, error) {
 	if err := source.IsValid(); err != nil {
 		return nil, stacktrace.Propagate(err, "Invalid source")
 	}
 
 	client := analytics.New(accountWriteKey)
 
-	//We should uncomment this code if we want to create an event to identify the user
-	//every time the client is created, it will be add a new row in SF "Identifies" table
+	//We could uncomment this code if we want to create an event to identify the user
+	//every time the client is created, it will be adding a new row in SF "Identifies" table
 	/*
 	if err := client.Enqueue(analytics.Identify{
 		UserId: userId,
@@ -37,7 +34,9 @@ func NewSegmentClient(source metrics_source.Source, userId string) (*SegmentClie
 		return nil, stacktrace.Propagate(err, "An error occurred enqueuing a new identify event in Segment client's queue")
 	}*/
 
-	return &SegmentClient{client: client, source: source, userID: userId}, nil
+	analyticsContext := newAnalyticsContext(source, sourceVersion)
+
+	return &SegmentClient{client: client, analyticsContext: analyticsContext, userID: userId}, nil
 }
 
 
@@ -153,10 +152,22 @@ func (segment *SegmentClient) track(event *event.Event) error {
 	if err := segment.client.Enqueue(analytics.Track{
 		Event:  event.GetName(),
 		UserId: segment.userID,
+		Context: segment.analyticsContext,
 		Properties: analytics.NewProperties().
 			Set(event.GetPropertyKey(), event.GetPropertyValue()),
 	}); err != nil {
 		return stacktrace.Propagate(err, "An error occurred enqueuing a new event in Segment client's queue")
 	}
 	return nil
+}
+
+func newAnalyticsContext(source metrics_source.Source, sourceVersion string) *analytics.Context {
+	appInfo := analytics.AppInfo{
+		Name: string(source),
+		Version: sourceVersion,
+	}
+
+	analyticsContext := &analytics.Context{App: appInfo}
+
+	return analyticsContext
 }
