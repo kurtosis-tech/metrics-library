@@ -10,6 +10,8 @@ import (
 const (
 	//Key generated in my lporoli trial account
 	accountWriteKey = "WbfsEYlBdRyaML5adTucEzqBkpQsz4p7"
+
+	shouldTrackIdentifyUserEventWhenClientIsCreated = false
 )
 
 type SegmentClient struct {
@@ -25,16 +27,18 @@ func NewSegmentClient(source metrics_source.Source, sourceVersion string, userId
 
 	client := analytics.New(accountWriteKey)
 
-	//We could uncomment this code if we want to create an event to identify the user
-	//every time the client is created, it will be adding a new row in SF "Identifies" table
-	/*
-	if err := client.Enqueue(analytics.Identify{
-		UserId: userId,
-	}); err != nil {
-		return nil, stacktrace.Propagate(err, "An error occurred enqueuing a new identify event in Segment client's queue")
-	}*/
-
 	analyticsContext := newAnalyticsContext(source, sourceVersion)
+
+	//We could activate this functionality if we want to track an event to identify the user
+	//every time the client is created, it will be adding a new row in SF "Identifies" table
+	if shouldTrackIdentifyUserEventWhenClientIsCreated {
+		if err := client.Enqueue(analytics.Identify{
+			UserId: userId,
+			Context: analyticsContext,
+		}); err != nil {
+			return nil, stacktrace.Propagate(err, "An error occurred enqueuing a new identify event in Segment client's queue")
+		}
+	}
 
 	return &SegmentClient{client: client, analyticsContext: analyticsContext, userID: userId}, nil
 }
