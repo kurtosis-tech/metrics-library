@@ -10,8 +10,8 @@ func NewDoNothingClient() *DoNothingClient {
 	return &DoNothingClient{}
 }
 
-func (client *DoNothingClient) TrackUserAcceptSendingMetrics(userAcceptSendingMetrics bool) error {
-	logrus.Debugf("Do nothing client TrackUserAcceptSendingMetrics called with argument userAcceptSendingMetrics '%v'", userAcceptSendingMetrics)
+func (client *DoNothingClient) TrackUserAcceptSendingMetrics(didUserAcceptSendingMetrics bool) error {
+	logrus.Debugf("Do nothing client TrackUserAcceptSendingMetrics called with argument didUserAcceptSendingMetrics '%v'", didUserAcceptSendingMetrics)
 	return nil
 }
 

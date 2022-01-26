@@ -16,7 +16,7 @@ const (
 	//https://segment.com/docs/getting-started/04-full-install/#event-naming-best-practices
 	enclaveIDPropertyKey = "enclave_id"
 	moduleIDPropertyKey = "module_id"
-	userAcceptSendingMetricsKey = "user_accept_sending_metrics"
+	didUserAcceptSendingMetricsKey = "did_user_accept_sending_metrics"
 	shouldCleanAllPropertyKey = "should_clean_all"
 
 	//Categories
@@ -36,15 +36,15 @@ const (
 
 )
 
-func NewUserAcceptSendingMetricsEvent(userAcceptSendingMetrics bool) (*Event, error) {
+func NewUserAcceptSendingMetricsEvent(didUserAcceptSendingMetrics bool) (*Event, error) {
 	var metricsValue string
-	if userAcceptSendingMetrics{
+	if didUserAcceptSendingMetrics {
 		metricsValue = yesStr
 	} else {
 		metricsValue = noStr
 	}
 
-	event, err := newEvent(installCategory, consentAction, userAcceptSendingMetricsKey, metricsValue)
+	event, err := newEvent(installCategory, consentAction, didUserAcceptSendingMetricsKey, metricsValue)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "An error occurred creating a new user accept sending metrics event")
 	}

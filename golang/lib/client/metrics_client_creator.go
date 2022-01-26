@@ -8,11 +8,11 @@ import (
 	"github.com/kurtosis-tech/stacktrace"
 )
 
-func CreateDefaultMetricsClient(source source.Source, sourceVersion string, userId string, userAcceptSendingMetrics bool) (MetricsClient, error) {
+func CreateDefaultMetricsClient(source source.Source, sourceVersion string, userId string, didUserAcceptSendingMetrics bool) (MetricsClient, error) {
 
 	metricsProvider := DoNoting
 
-	if userAcceptSendingMetrics{
+	if didUserAcceptSendingMetrics{
 		//Setting default Metrics Client
 		metricsProvider = Segment
 	}

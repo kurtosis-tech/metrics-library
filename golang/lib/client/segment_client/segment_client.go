@@ -60,9 +60,9 @@ func NewSegmentClient(source metrics_source.Source, sourceVersion string, userId
 }
 
 
-func (segment *SegmentClient) TrackUserAcceptSendingMetrics(userAcceptSendingMetrics bool) error {
+func (segment *SegmentClient) TrackUserAcceptSendingMetrics(didUserAcceptSendingMetrics bool) error {
 
-	newEvent, err := event.NewUserAcceptSendingMetricsEvent(userAcceptSendingMetrics)
+	newEvent, err := event.NewUserAcceptSendingMetricsEvent(didUserAcceptSendingMetrics)
 	if err != nil {
 		return stacktrace.Propagate(err, "An error occurred creating a new user accept sending metrics event")
 	}

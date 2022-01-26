@@ -71,9 +71,9 @@ func NewSnowPlowClient(source metrics_source.Source, sourceVersion string, userI
 	return &SnowPlowClient{tracker: tracker, analyticsContext: analyticsContext}, nil
 }
 
-func (snowPlow *SnowPlowClient) TrackUserAcceptSendingMetrics(userAcceptSendingMetrics bool) error {
+func (snowPlow *SnowPlowClient) TrackUserAcceptSendingMetrics(didUserAcceptSendingMetrics bool) error {
 
-	newEvent, err := event.NewUserAcceptSendingMetricsEvent(userAcceptSendingMetrics)
+	newEvent, err := event.NewUserAcceptSendingMetricsEvent(didUserAcceptSendingMetrics)
 	if err != nil {
 		return stacktrace.Propagate(err, "An error occurred creating a new user accept sending metrics event")
 	}
