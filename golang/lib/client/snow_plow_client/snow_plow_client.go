@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	spCollectorURI = "8e280f93-12b7-4610-bd19-a5d7bc9e41dd.app.try-snowplow.com"  //TODO we can get this for an Envar
+	spCollectorURI = "8e280f93-12b7-4610-bd19-a5d7bc9e41dd.app.try-snowplow.com"
 	spProtocol     = "https"
 	spNamespace    = "kurtosistech"
 

@@ -9,7 +9,7 @@ import (
 
 const (
 	//Key generated in my lporoli trial account
-	accountWriteKey = "WbfsEYlBdRyaML5adTucEzqBkpQsz4p7"  //TODO we can get this for an Envar
+	accountWriteKey = "WbfsEYlBdRyaML5adTucEzqBkpQsz4p7"
 
 	shouldTrackIdentifyUserEventWhenClientIsCreated = false
 )
