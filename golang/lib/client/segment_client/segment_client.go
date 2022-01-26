@@ -4,7 +4,9 @@ import (
 	"github.com/kurtosis-tech/metrics-library/golang/lib/event"
 	metrics_source "github.com/kurtosis-tech/metrics-library/golang/lib/source"
 	"github.com/kurtosis-tech/stacktrace"
+	"github.com/segmentio/backo-go"
 	"gopkg.in/segmentio/analytics-go.v3"
+	"time"
 )
 
 const (
@@ -25,7 +27,21 @@ func NewSegmentClient(source metrics_source.Source, sourceVersion string, userId
 		return nil, stacktrace.Propagate(err, "Invalid source")
 	}
 
-	client := analytics.New(accountWriteKey)
+	config := analytics.Config{
+		Interval: 10 * time.Minute,
+		//NOTE: Segment client has a max attempt = 10, so this retry strategy
+		//allow us to execute the first attempt in 5 seconds and the last attend in 24 hours
+		//which is useful if a user is executing the metrics without internet connection for several hours
+		RetryAfter: func(attempt int) time.Duration {
+			retryBacko := backo.NewBacko(time.Second*5, 3, 0, time.Hour*24)
+			return retryBacko.Duration(attempt)
+		},
+	}
+
+	client, err := analytics.NewWithConfig(accountWriteKey, config)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "An error occurred creating new Segment client with config '%+v'", config)
+	}
 
 	analyticsContext := newAnalyticsContext(source, sourceVersion)
 
