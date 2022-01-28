@@ -16,35 +16,39 @@ const (
 	//https://segment.com/docs/getting-started/04-full-install/#event-naming-best-practices
 	enclaveIDPropertyKey = "enclave_id"
 	moduleIDPropertyKey = "module_id"
+	containerImageNamePropertyKey = "container_image_name"
+	containerImageVersionPropertyKey = "container_image_version"
+	moduleParamsPropertyKey = "module_params"
 	didUserAcceptSendingMetricsKey = "did_user_accept_sending_metrics"
-	shouldCleanAllPropertyKey = "should_clean_all"
 
 	//Categories
-	installCategory = "Install"
-	enclaveCategory = "Enclave"
-	moduleCategory = "Module"
+	installCategory = "install"
+	enclaveCategory = "enclave"
+	moduleCategory = "module"
 
 	//Actions
-	consentAction = "Consent"
-	createAction = "Create"
-	stopAction = "Stop"
-	destroyAction = "Destroy"
-	cleanAction = "Clean"
-	loadAction = "Load"
-	unloadAction = "Unload"
-	executeAction = "Execute"
+	consentAction = "consent"
+	createAction = "create"
+	stopAction = "stop"
+	destroyAction = "destroy"
+	loadAction = "load"
+	unloadAction = "unload"
+	executeAction = "execute"
+
+	containerImageSeparatorCharacter = ":"
+	validAmountOfColonsInContainerImage = 1
 
 )
 
-func NewUserAcceptSendingMetricsEvent(didUserAcceptSendingMetrics bool) (*Event, error) {
-	var metricsValue string
-	if didUserAcceptSendingMetrics {
-		metricsValue = yesStr
-	} else {
-		metricsValue = noStr
+func NewShouldSendMetricsUserElectionEvent(didUserAcceptSendingMetrics bool) (*Event, error) {
+
+	didUserAcceptSendingMetricsStr := fmt.Sprintf("%v", didUserAcceptSendingMetrics)
+
+	properties := map[string]string{
+		didUserAcceptSendingMetricsKey: didUserAcceptSendingMetricsStr,
 	}
 
-	event, err := newEvent(installCategory, consentAction, didUserAcceptSendingMetricsKey, metricsValue)
+	event, err := newEvent(installCategory, consentAction, properties)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "An error occurred creating a new user accept sending metrics event")
 	}
@@ -53,12 +57,16 @@ func NewUserAcceptSendingMetricsEvent(didUserAcceptSendingMetrics bool) (*Event,
 }
 
 func NewCreateEnclaveEvent(enclaveId string) (*Event, error) {
-	hashedEnclaveId, err := validateEnclaveIdAndGetHashedValue(enclaveId)
+	hashedEnclaveId, err := chekIfNotEmptyStringAndGetHashedValue(enclaveId)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "An error occurred validating ang getting hashed enclave id")
+		return nil, stacktrace.Propagate(err, "An error occurred validating and getting hashed enclave id")
 	}
 
-	event, err := newEvent(enclaveCategory, createAction, enclaveIDPropertyKey, hashedEnclaveId)
+	properties := map[string]string{
+		enclaveIDPropertyKey: hashedEnclaveId,
+	}
+
+	event, err := newEvent(enclaveCategory, createAction, properties)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "An error occurred creating a new create enclave event")
 	}
@@ -67,12 +75,16 @@ func NewCreateEnclaveEvent(enclaveId string) (*Event, error) {
 }
 
 func NewStopEnclaveEvent(enclaveId string) (*Event, error) {
-	hashedEnclaveId, err := validateEnclaveIdAndGetHashedValue(enclaveId)
+	hashedEnclaveId, err := chekIfNotEmptyStringAndGetHashedValue(enclaveId)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "An error occurred validating ang getting hashed enclave id")
+		return nil, stacktrace.Propagate(err, "An error occurred validating and getting hashed enclave id")
 	}
 
-	event, err := newEvent(enclaveCategory, stopAction, enclaveIDPropertyKey, hashedEnclaveId)
+	properties := map[string]string{
+		enclaveIDPropertyKey: hashedEnclaveId,
+	}
+
+	event, err := newEvent(enclaveCategory, stopAction, properties)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "An error occurred creating a new stop enclave event")
 	}
@@ -81,12 +93,16 @@ func NewStopEnclaveEvent(enclaveId string) (*Event, error) {
 }
 
 func NewDestroyEnclaveEvent(enclaveId string) (*Event, error) {
-	hashedEnclaveId, err := validateEnclaveIdAndGetHashedValue(enclaveId)
+	hashedEnclaveId, err := chekIfNotEmptyStringAndGetHashedValue(enclaveId)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "An error occurred validating ang getting hashed enclave id")
+		return nil, stacktrace.Propagate(err, "Enclave ID can not be an empty string")
 	}
 
-	event, err := newEvent(enclaveCategory, destroyAction, enclaveIDPropertyKey, hashedEnclaveId)
+	properties := map[string]string{
+		enclaveIDPropertyKey: hashedEnclaveId,
+	}
+
+	event, err := newEvent(enclaveCategory, destroyAction, properties)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "An error occurred creating a new destroy enclave event")
 	}
@@ -94,23 +110,28 @@ func NewDestroyEnclaveEvent(enclaveId string) (*Event, error) {
 	return event, nil
 }
 
-func NewCleanEnclaveEvent(shouldCleanAll bool) (*Event, error) {
-	var metricsValue string
-	if shouldCleanAll{
-		metricsValue = yesStr
-	} else {
-		metricsValue = noStr
-	}
+func NewLoadModuleEvent(moduleId, containerImage, serializedParams string) (*Event, error) {
 
-	event, err := newEvent(enclaveCategory, cleanAction, shouldCleanAllPropertyKey, metricsValue)
+	hashedModuleId, err := chekIfNotEmptyStringAndGetHashedValue(moduleId)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "An error occurred creating a new clean enclave event")
+		return nil, stacktrace.Propagate(err, "Module ID can not be an empty string")
 	}
-	return event, nil
-}
 
-func NewLoadModuleEvent(moduleId string) (*Event, error) {
-	event, err := newEvent(moduleCategory, loadAction, moduleIDPropertyKey, moduleId)
+	containerImageName, containerImageVersion, err := splitContainerImageIntoNameAndVersion(containerImage)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "An error occurred splitting container image '%v' into image name and image version", containerImage)
+	}
+
+	hashedSerializedParams := hashString(serializedParams)
+
+	properties := map[string]string{
+		moduleIDPropertyKey: hashedModuleId,
+		containerImageNamePropertyKey: containerImageName,
+		containerImageVersionPropertyKey: containerImageVersion,
+		moduleParamsPropertyKey: hashedSerializedParams,
+	}
+
+	event, err := newEvent(moduleCategory, loadAction, properties)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "An error occurred creating a new load module event")
 	}
@@ -118,15 +139,38 @@ func NewLoadModuleEvent(moduleId string) (*Event, error) {
 }
 
 func NewUnloadModuleEvent(moduleId string) (*Event, error) {
-	event, err := newEvent(moduleCategory, unloadAction, moduleIDPropertyKey, moduleId)
+
+	hashedModuleId, err := chekIfNotEmptyStringAndGetHashedValue(moduleId)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "Module ID can not be an empty string")
+	}
+
+	properties := map[string]string{
+		moduleIDPropertyKey: hashedModuleId,
+	}
+
+	event, err := newEvent(moduleCategory, unloadAction, properties)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "An error occurred creating a new unload module event")
 	}
 	return event, nil
 }
 
-func NewExecuteModuleEvent(moduleId string) (*Event, error) {
-	event, err := newEvent(moduleCategory, executeAction, moduleIDPropertyKey, moduleId)
+func NewExecuteModuleEvent(moduleId, serializedParams string) (*Event, error) {
+
+	hashedModuleId, err := chekIfNotEmptyStringAndGetHashedValue(moduleId)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "Module ID can not be an empty string")
+	}
+
+	hashedSerializedParams := hashString(serializedParams)
+
+	properties := map[string]string{
+		moduleIDPropertyKey: hashedModuleId,
+		moduleParamsPropertyKey: hashedSerializedParams,
+	}
+
+	event, err := newEvent(moduleCategory, executeAction, properties)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "An error occurred creating a new execute module event")
 	}
@@ -136,16 +180,16 @@ func NewExecuteModuleEvent(moduleId string) (*Event, error) {
 // ================================================================================================
 //                                  Private Helper Functions
 // ================================================================================================
-func validateEnclaveIdAndGetHashedValue(enclaveId string) (string, error)  {
-	enclaveId = strings.TrimSpace(enclaveId)
+func chekIfNotEmptyStringAndGetHashedValue(value string) (string, error)  {
+	valueWithoutSpaces := strings.TrimSpace(value)
 
-	if enclaveId == "" {
-		return "", stacktrace.NewError("Enclave ID can not be empty string")
+	if valueWithoutSpaces == "" {
+		return "", stacktrace.NewError("Invalid value, it can not be an empty string")
 	}
 
-	hashedEnclaveId := hashString(enclaveId)
+	hashedValue := hashString(value)
 
-	return hashedEnclaveId, nil
+	return hashedValue, nil
 }
 
 func hashString(value string) string {
@@ -158,4 +202,15 @@ func hashString(value string) string {
 	hexValue := fmt.Sprintf("%x", hashedByteSlice)
 
 	return hexValue
+}
+
+func splitContainerImageIntoNameAndVersion(containerImage string) (string, string, error) {
+	amountOfColons := strings.Count(containerImage, containerImageSeparatorCharacter)
+	if amountOfColons != validAmountOfColonsInContainerImage{
+		return "", "", stacktrace.NewError("Invalid container image, it has '%v' colons and should has '%v'", amountOfColons, validAmountOfColonsInContainerImage)
+	}
+
+	containerImageSlice := strings.Split(containerImage, containerImageSeparatorCharacter)
+
+	return containerImageSlice[0], containerImageSlice[1], nil
 }

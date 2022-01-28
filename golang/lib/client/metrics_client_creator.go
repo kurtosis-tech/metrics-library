@@ -3,42 +3,33 @@ package client
 import (
 	"github.com/kurtosis-tech/metrics-library/golang/lib/client/do_nothing_client"
 	"github.com/kurtosis-tech/metrics-library/golang/lib/client/segment_client"
-	"github.com/kurtosis-tech/metrics-library/golang/lib/client/snow_plow_client"
 	"github.com/kurtosis-tech/metrics-library/golang/lib/source"
 	"github.com/kurtosis-tech/stacktrace"
 )
 
-func CreateDefaultMetricsClient(source source.Source, sourceVersion string, userId string, didUserAcceptSendingMetrics bool) (MetricsClient, error) {
+const(
+	defaultMetricsType = Segment
+)
 
-	metricsProvider := DoNoting
+func CreateMetricsClient(source source.Source, sourceVersion string, userId string, didUserAcceptSendingMetrics bool) (MetricsClient, error) {
+
+	metricsClientType := DoNothing
 
 	if didUserAcceptSendingMetrics{
-		//Setting default Metrics Client
-		metricsProvider = Segment
+		metricsClientType = defaultMetricsType
 	}
 
-	return CreateMetricsClient(source, sourceVersion, userId, metricsProvider)
-}
-
-func CreateMetricsClient(source source.Source, sourceVersion string, userId string, metricsProvider MetricsClientProvider) (MetricsClient, error) {
-
-	switch metricsProvider {
+	switch metricsClientType {
 	case Segment:
 		metricsClient, err := segment_client.NewSegmentClient(source, sourceVersion, userId)
 		if err != nil {
 			return nil, stacktrace.Propagate(err, "An error occurred creating Segment metrics client")
 		}
 		return metricsClient, nil
-	case SnowPlow:
-		metricsClient, err := snow_plow_client.NewSnowPlowClient(source, sourceVersion, userId)
-		if err != nil {
-			return nil, stacktrace.Propagate(err, "An error occurred creating SnowPlow metrics client")
-		}
-		return metricsClient, nil
-	case DoNoting:
+	case DoNothing:
 		metricsClient := do_nothing_client.NewDoNothingClient()
 		return metricsClient, nil
-    default:
-		return nil, stacktrace.NewError("Unrecognized metrics provider '%v'", metricsProvider)
+	default:
+		return nil, stacktrace.NewError("Unrecognized metrics client type '%v'", metricsClientType)
 	}
 }

@@ -1,12 +1,11 @@
 package client
 
 type MetricsClient interface {
-	TrackUserAcceptSendingMetrics(didUserAcceptSendingMetrics bool) error
+	TrackShouldSendMetricsUserElection(didUserAcceptSendingMetrics bool) error
 	TrackCreateEnclave(enclaveId string) error
 	TrackStopEnclave(enclaveId string) error
 	TrackDestroyEnclave(enclaveId string) error
-	TrackCleanEnclave(shouldCleanAll bool) error
-	TrackLoadModule(moduleId string) error
-	TrackExecuteModule(moduleId string) error
+	TrackLoadModule(moduleId, containerImage, serializedParams string) error
+	TrackExecuteModule(moduleId, serializedParams string) error
 	TrackUnloadModule(moduleId string) error
 }

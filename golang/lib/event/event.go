@@ -12,20 +12,26 @@ type Event struct {
 	//Action performed/event name (e.g. create, load)
 	action string
 
-	//A property Key associated with the object of the action (e.g. enclave ID, module name)
-	propertyKey string
+	//Properties' keys and values associated with the object of the action (e.g. enclave ID, module name)
+	properties map[string]string
 
-	//The property value
-	propertyValue string
 }
 
-func newEvent(category, action, propertyKey, propertyValue string) (*Event, error) {
+func newEvent(category string, action string, properties map[string]string) (*Event, error) {
 
-	event := &Event{category: category, action: action, propertyKey: propertyKey, propertyValue: propertyValue}
+	categoryWithoutSpaces := strings.TrimSpace(category)
 
-	if err := event.IsValid(); err != nil {
-		return nil, stacktrace.Propagate(err, "Invalid event '%+v'", event)
+	if categoryWithoutSpaces == "" {
+		return nil, stacktrace.NewError("Event's category can not be empty string")
 	}
+
+	actionWithoutSpaces := strings.TrimSpace(action)
+
+	if actionWithoutSpaces == "" {
+		return nil, stacktrace.NewError("Event's action can not be empty string")
+	}
+
+	event := &Event{category: categoryWithoutSpaces, action: actionWithoutSpaces, properties: properties}
 
 	return event, nil
 }
@@ -42,28 +48,7 @@ func (event *Event) GetName() string {
 	return strings.Join([]string{event.category,event.action}, "-")
 }
 
-func (event *Event) GetPropertyKey() string {
-	return event.propertyKey
+func (event *Event) GetProperties() map[string]string {
+	return event.properties
 }
 
-func (event *Event) GetPropertyValue() string {
-	return event.propertyValue
-}
-
-//IsValid return nil if the event is valid
-//Category an action are mandatory
-func (event *Event) IsValid() error {
-	category := strings.TrimSpace(event.category)
-
-	if category == "" {
-		return stacktrace.NewError("Event's category can not be empty string")
-	}
-
-	action := strings.TrimSpace(event.action)
-
-	if action == "" {
-		return stacktrace.NewError("Event's action can not be empty string")
-	}
-
-	return nil
-}

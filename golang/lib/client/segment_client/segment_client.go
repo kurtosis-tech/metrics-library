@@ -14,6 +14,13 @@ const (
 	accountWriteKey = "WbfsEYlBdRyaML5adTucEzqBkpQsz4p7"
 
 	shouldTrackIdentifyUserEventWhenClientIsCreated = false
+
+	segmentClientInterval = 10 * time.Minute
+
+	retryBackoBaseDuration = time.Second*5
+	retryBackoFactor = 3
+	retryBackoJitter = 0
+	retryBackoCap = time.Hour*24
 )
 
 type SegmentClient struct {
@@ -23,17 +30,15 @@ type SegmentClient struct {
 }
 
 func NewSegmentClient(source metrics_source.Source, sourceVersion string, userId string) (*SegmentClient, error) {
-	if err := source.IsValid(); err != nil {
-		return nil, stacktrace.Propagate(err, "Invalid source")
-	}
 
 	config := analytics.Config{
-		Interval: 10 * time.Minute,
+		//The flushing interval of the client
+		Interval: segmentClientInterval,
 		//NOTE: Segment client has a max attempt = 10, so this retry strategy
 		//allow us to execute the first attempt in 5 seconds and the last attend in 24 hours
 		//which is useful if a user is executing the metrics without internet connection for several hours
 		RetryAfter: func(attempt int) time.Duration {
-			retryBacko := backo.NewBacko(time.Second*5, 3, 0, time.Hour*24)
+			retryBacko := backo.NewBacko(retryBackoBaseDuration, retryBackoFactor, retryBackoJitter, retryBackoCap)
 			return retryBacko.Duration(attempt)
 		},
 	}
@@ -60,9 +65,9 @@ func NewSegmentClient(source metrics_source.Source, sourceVersion string, userId
 }
 
 
-func (segment *SegmentClient) TrackUserAcceptSendingMetrics(didUserAcceptSendingMetrics bool) error {
+func (segment *SegmentClient) TrackShouldSendMetricsUserElection(didUserAcceptSendingMetrics bool) error {
 
-	newEvent, err := event.NewUserAcceptSendingMetricsEvent(didUserAcceptSendingMetrics)
+	newEvent, err := event.NewShouldSendMetricsUserElectionEvent(didUserAcceptSendingMetrics)
 	if err != nil {
 		return stacktrace.Propagate(err, "An error occurred creating a new user accept sending metrics event")
 	}
@@ -113,21 +118,8 @@ func (segment *SegmentClient) TrackDestroyEnclave(enclaveId string) error {
 	return nil
 }
 
-func (segment *SegmentClient) TrackCleanEnclave(shouldCleanAll bool) error {
-	newEvent, err := event.NewCleanEnclaveEvent(shouldCleanAll)
-	if err != nil {
-		return stacktrace.Propagate(err, "An error occurred creating a new clean enclave event")
-	}
-
-	if err := segment.track(newEvent); err != nil {
-		return stacktrace.Propagate(err, "An error occurred tracking clean enclave event")
-	}
-
-	return nil
-}
-
-func (segment *SegmentClient) TrackLoadModule(moduleId string) error {
-	newEvent, err := event.NewLoadModuleEvent(moduleId)
+func (segment *SegmentClient) TrackLoadModule(moduleId, containerImage, serializedParams string) error {
+	newEvent, err := event.NewLoadModuleEvent(moduleId, containerImage, serializedParams)
 	if err != nil {
 		return stacktrace.Propagate(err, "An error occurred creating a new load module event")
 	}
@@ -152,8 +144,8 @@ func (segment *SegmentClient) TrackUnloadModule(moduleId string) error {
 	return nil
 }
 
-func (segment *SegmentClient) TrackExecuteModule(moduleId string) error {
-	newEvent, err := event.NewExecuteModuleEvent(moduleId)
+func (segment *SegmentClient) TrackExecuteModule(moduleId, serializedParams string) error {
+	newEvent, err := event.NewExecuteModuleEvent(moduleId, serializedParams)
 	if err != nil {
 		return stacktrace.Propagate(err, "An error occurred creating a new execute module event")
 	}
@@ -169,12 +161,20 @@ func (segment *SegmentClient) TrackExecuteModule(moduleId string) error {
 // 									   Private helper methods
 // ====================================================================================================
 func (segment *SegmentClient) track(event *event.Event) error {
+
+	propertiesToTrack := analytics.NewProperties()
+
+	eventProperties := event.GetProperties()
+
+	for propertyKey, propertyValue := range eventProperties {
+		propertiesToTrack.Set(propertyKey, propertyValue)
+	}
+
 	if err := segment.client.Enqueue(analytics.Track{
 		Event:  event.GetName(),
 		UserId: segment.userID,
 		Context: segment.analyticsContext,
-		Properties: analytics.NewProperties().
-			Set(event.GetPropertyKey(), event.GetPropertyValue()),
+		Properties: propertiesToTrack,
 	}); err != nil {
 		return stacktrace.Propagate(err, "An error occurred enqueuing a new event in Segment client's queue")
 	}
@@ -183,7 +183,7 @@ func (segment *SegmentClient) track(event *event.Event) error {
 
 func newAnalyticsContext(source metrics_source.Source, sourceVersion string) *analytics.Context {
 	appInfo := analytics.AppInfo{
-		Name: string(source),
+		Name: source.GetKey(),
 		Version: sourceVersion,
 	}
 

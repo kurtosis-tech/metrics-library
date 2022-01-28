@@ -1,24 +1,20 @@
 package source
 
-import "github.com/kurtosis-tech/stacktrace"
 
-const (
-	KurtosisCLISource    Source = "kurtosis-cli"
-	KurtosisEngineSource Source = "kurtosis-engine"
-	KurtosisAPISource    Source = "kurtosis-api"
+var (
+	KurtosisCLISource    = Source{"kurtosis-cli"}
+	KurtosisEngineSource = Source{"kurtosis-engine"}
+	KurtosisCoreSource   = Source{"kurtosis-core"}
 )
 
-var allValidSources = map[Source]bool{
-	KurtosisCLISource:    true,
-	KurtosisEngineSource: true,
-	KurtosisAPISource:    true,
+//We declare Source as a struct to protect the value, so clients of this library can not create
+//their own implementation of Source because key is a private key and there is not constructor
+//It's called as Struct-based Enums, can se more here: https://threedots.tech/post/safer-enums-in-go/
+type Source struct {
+	key string
 }
 
-type Source string
-
-func (source Source) IsValid() error {
-	if _, found := allValidSources[source]; !found {
-		return stacktrace.NewError("The source '%v' is not valid. Valid sources: %+v", source, allValidSources)
-	}
-	return nil
+func (src *Source) GetKey() string {
+	return src.key
 }
+
