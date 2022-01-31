@@ -31,7 +31,8 @@ type SegmentClient struct {
 	userID string
 }
 
-//TODO add a comment related to the shouldFlushQueueOnEachEvent argument
+//The argument shouldFlushQueueOnEachEvent is used to imitate a sync request, it is not exactly the same because
+//the event is enqueued but the queue is flushed suddenly so is pretty close to event traked in sync
 func NewSegmentClient(source metrics_source.Source, sourceVersion string, userId string, shouldFlushQueueOnEachEvent bool) (*SegmentClient, error) {
 
 	config := analytics.Config{
@@ -47,6 +48,7 @@ func NewSegmentClient(source metrics_source.Source, sourceVersion string, userId
 	}
 
 	if shouldFlushQueueOnEachEvent {
+		//if BatchSize is equal = 1 the event will being send immediately
 		config.BatchSize = leastBatchSizeValue
 	}
 

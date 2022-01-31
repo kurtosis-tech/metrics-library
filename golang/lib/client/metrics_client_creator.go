@@ -11,6 +11,8 @@ const(
 	defaultMetricsType = Segment
 )
 
+//The argument shouldFlushQueueOnEachEvent is used to imitate a sync request, it is not exactly the same because
+//the event is enqueued but the queue is flushed suddenly so is pretty close to event traked in sync
 func CreateMetricsClient(source source.Source, sourceVersion string, userId string, didUserAcceptSendingMetrics bool, shouldFlushQueueOnEachEvent bool) (MetricsClient, error) {
 
 	metricsClientType := DoNothing
