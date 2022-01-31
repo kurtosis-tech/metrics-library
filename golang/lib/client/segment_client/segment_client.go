@@ -15,20 +15,20 @@ const (
 
 	shouldTrackIdentifyUserEventWhenClientIsCreated = false
 
-	segmentClientInterval = 10 * time.Minute
+	segmentClientFlushInterval = 10 * time.Minute
 
-	retryBackoBaseDuration = time.Second*5
-	retryBackoFactor = 3
-	retryBackoJitter = 0
-	retryBackoCap = time.Hour*24
+	retryBackoffBaseDuration = time.Second * 5
+	retryBackoffFactor       = 3
+	retryBackoffJitter       = 0
+	retryBackoffCap          = time.Hour * 24
 
-	leastBatchSizeValue = 1
+	batchSizeValueForFlushAfterEveryEvent = 1
 )
 
 type SegmentClient struct {
-	client analytics.Client
+	client           analytics.Client
 	analyticsContext *analytics.Context
-	userID string
+	userID           string
 }
 
 //The argument shouldFlushQueueOnEachEvent is used to imitate a sync request, it is not exactly the same because
@@ -37,19 +37,19 @@ func NewSegmentClient(source metrics_source.Source, sourceVersion string, userId
 
 	config := analytics.Config{
 		//The flushing interval of the client
-		Interval: segmentClientInterval,
+		Interval: segmentClientFlushInterval,
 		//NOTE: Segment client has a max attempt = 10, so this retry strategy
 		//allow us to execute the first attempt in 5 seconds and the last attend in 24 hours
 		//which is useful if a user is executing the metrics without internet connection for several hours
 		RetryAfter: func(attempt int) time.Duration {
-			retryBacko := backo.NewBacko(retryBackoBaseDuration, retryBackoFactor, retryBackoJitter, retryBackoCap)
+			retryBacko := backo.NewBacko(retryBackoffBaseDuration, retryBackoffFactor, retryBackoffJitter, retryBackoffCap)
 			return retryBacko.Duration(attempt)
 		},
 	}
 
 	if shouldFlushQueueOnEachEvent {
 		//if BatchSize is equal = 1 the event will being send immediately
-		config.BatchSize = leastBatchSizeValue
+		config.BatchSize = batchSizeValueForFlushAfterEveryEvent
 	}
 
 	client, err := analytics.NewWithConfig(accountWriteKey, config)
@@ -60,10 +60,10 @@ func NewSegmentClient(source metrics_source.Source, sourceVersion string, userId
 	analyticsContext := newAnalyticsContext(source, sourceVersion)
 
 	//We could activate this functionality if we want to track an event to identify the user
-	//every time the client is created, it will be adding a new row in SF "Identifies" table
+	//every time the client is created
 	if shouldTrackIdentifyUserEventWhenClientIsCreated {
 		if err := client.Enqueue(analytics.Identify{
-			UserId: userId,
+			UserId:  userId,
 			Context: analyticsContext,
 		}); err != nil {
 			return nil, stacktrace.Propagate(err, "An error occurred enqueuing a new identify event in Segment client's queue")
@@ -73,16 +73,15 @@ func NewSegmentClient(source metrics_source.Source, sourceVersion string, userId
 	return &SegmentClient{client: client, analyticsContext: analyticsContext, userID: userId}, nil
 }
 
-
 func (segment *SegmentClient) TrackShouldSendMetricsUserElection(didUserAcceptSendingMetrics bool) error {
 
 	newEvent, err := event.NewShouldSendMetricsUserElectionEvent(didUserAcceptSendingMetrics)
 	if err != nil {
-		return stacktrace.Propagate(err, "An error occurred creating a new user accept sending metrics event")
+		return stacktrace.Propagate(err, "An error occurred creating a new should-send-metrics user election event")
 	}
 
 	if err := segment.track(newEvent); err != nil {
-		return stacktrace.Propagate(err, "An error occurred tracking user accept sending metrics event")
+		return stacktrace.Propagate(err, "An error occurred tracking should-send-metrics user election")
 	}
 
 	return nil
@@ -189,19 +188,19 @@ func (segment *SegmentClient) track(event *event.Event) error {
 	}
 
 	if err := segment.client.Enqueue(analytics.Track{
-		Event:  event.GetName(),
-		UserId: segment.userID,
-		Context: segment.analyticsContext,
+		Event:      event.GetName(),
+		UserId:     segment.userID,
+		Context:    segment.analyticsContext,
 		Properties: propertiesToTrack,
 	}); err != nil {
-		return stacktrace.Propagate(err, "An error occurred enqueuing a new event in Segment client's queue")
+		return stacktrace.Propagate(err, "An error occurred enqueuing a new event with name '%v' and properties '%+v' in Segment client's queue", event.GetName(), propertiesToTrack)
 	}
 	return nil
 }
 
 func newAnalyticsContext(source metrics_source.Source, sourceVersion string) *analytics.Context {
 	appInfo := analytics.AppInfo{
-		Name: source.GetKey(),
+		Name:    source.GetKey(),
 		Version: sourceVersion,
 	}
 
