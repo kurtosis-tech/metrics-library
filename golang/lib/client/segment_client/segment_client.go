@@ -21,6 +21,8 @@ const (
 	retryBackoFactor = 3
 	retryBackoJitter = 0
 	retryBackoCap = time.Hour*24
+
+	leastBatchSizeValue = 1
 )
 
 type SegmentClient struct {
@@ -29,7 +31,8 @@ type SegmentClient struct {
 	userID string
 }
 
-func NewSegmentClient(source metrics_source.Source, sourceVersion string, userId string) (*SegmentClient, error) {
+//TODO add a comment related to the shouldFlushQueueOnEachEvent argument
+func NewSegmentClient(source metrics_source.Source, sourceVersion string, userId string, shouldFlushQueueOnEachEvent bool) (*SegmentClient, error) {
 
 	config := analytics.Config{
 		//The flushing interval of the client
@@ -41,6 +44,10 @@ func NewSegmentClient(source metrics_source.Source, sourceVersion string, userId
 			retryBacko := backo.NewBacko(retryBackoBaseDuration, retryBackoFactor, retryBackoJitter, retryBackoCap)
 			return retryBacko.Duration(attempt)
 		},
+	}
+
+	if shouldFlushQueueOnEachEvent {
+		config.BatchSize = leastBatchSizeValue
 	}
 
 	client, err := analytics.NewWithConfig(accountWriteKey, config)

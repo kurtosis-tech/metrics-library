@@ -11,7 +11,7 @@ const(
 	defaultMetricsType = Segment
 )
 
-func CreateMetricsClient(source source.Source, sourceVersion string, userId string, didUserAcceptSendingMetrics bool) (MetricsClient, error) {
+func CreateMetricsClient(source source.Source, sourceVersion string, userId string, didUserAcceptSendingMetrics bool, shouldFlushQueueOnEachEvent bool) (MetricsClient, error) {
 
 	metricsClientType := DoNothing
 
@@ -21,7 +21,7 @@ func CreateMetricsClient(source source.Source, sourceVersion string, userId stri
 
 	switch metricsClientType {
 	case Segment:
-		metricsClient, err := segment_client.NewSegmentClient(source, sourceVersion, userId)
+		metricsClient, err := segment_client.NewSegmentClient(source, sourceVersion, userId, shouldFlushQueueOnEachEvent)
 		if err != nil {
 			return nil, stacktrace.Propagate(err, "An error occurred creating Segment metrics client")
 		}
