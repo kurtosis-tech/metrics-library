@@ -47,3 +47,8 @@ func (client *DoNothingClient) TrackExecuteModule(moduleId, serializedParams str
 	logrus.Debugf("Do-nothing metrics client TrackExecuteModule called with argument moduleId '%v' and serializedParams '%v'; skipping sending event", moduleId, serializedParams)
 	return nil
 }
+
+func (client *DoNothingClient) Close() (err error) {
+	logrus.Debugf("Do-nothing metrics client close method called")
+	return nil
+}

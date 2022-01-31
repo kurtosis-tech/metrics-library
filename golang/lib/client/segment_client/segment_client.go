@@ -161,6 +161,15 @@ func (segment *SegmentClient) TrackExecuteModule(moduleId, serializedParams stri
 		return stacktrace.Propagate(err, "An error occurred tracking execute module event")
 	}
 
+	segment.client.Close()
+
+	return nil
+}
+
+func (segment *SegmentClient) Close() (err error) {
+	if err := segment.client.Close(); err != nil {
+		return stacktrace.Propagate(err, "An error occurred closing the Segment client")
+	}
 	return nil
 }
 
