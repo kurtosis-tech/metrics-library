@@ -83,12 +83,15 @@ workflows:
               ignore:
                 - develop
                 - master
-      - check_typescript:
-          filters:
-            branches:
-              ignore:
-                - develop
-                - master
+      # -- Typescript library build --------------------------------
+      # TODO UNCOMMENT WHEN CREATE TYPESCRIPT LIBRARY
+      #- check_typescript:
+      #    filters:
+      #      branches:
+      #        ignore:
+      #          - develop
+      #          - master
+      # -- End Typescript library build ----------------------------
       # -- End PR check jobs ---------------------------------------
 
       # -- Artifact-publishing jobs --------------------------------
