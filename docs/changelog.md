@@ -1,4 +1,6 @@
 # TBD
+
+# 0.1.1
 ### Features
 * Added `MetricsClient` interface to define Kurtosis metrics abstraction behaviour
 * Added `SegmentClient` implementation of the `MetricsClient` using Segment provider
