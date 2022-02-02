@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	//Key generated in my lporoli trial account
-	accountWriteKey = "WbfsEYlBdRyaML5adTucEzqBkpQsz4p7"
+	//This key was generated in Kurtosis' Segment account for the `Kurtosis-Metrics-Library` source
+	//You can configure this source on this page: https://app.segment.com/kurtosis/sources/kurtosis-metrics-library/overview
+	accountWriteKey = "KpA8kDssJU1j0kuBZ0r2A81wuD1yisOn"
 
 	shouldTrackIdentifyUserEventWhenClientIsCreated = false
 

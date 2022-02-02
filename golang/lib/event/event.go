@@ -34,7 +34,7 @@ func newEvent(category string, action string, properties map[string]string) (*Ev
 	for propertyKey := range properties {
 		propertyKeyWithoutSpaces := strings.TrimSpace(propertyKey)
 		if propertyKeyWithoutSpaces == "" {
-			return nil, stacktrace.NewError("Propertie's key in an event can not be empty string")
+			return nil, stacktrace.NewError("Property's key in an event can not be empty string")
 		}
 	}
 

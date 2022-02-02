@@ -8,10 +8,6 @@ import (
 )
 
 const (
-	yesStr = "yes"
-	noStr = "no"
-
-
 	//We are following these naming conventions for event's data
 	//https://segment.com/docs/getting-started/04-full-install/#event-naming-best-practices
 	enclaveIDPropertyKey = "enclave_id"
@@ -37,7 +33,6 @@ const (
 
 	containerImageSeparatorCharacter = ":"
 	validAmountOfColonsInContainerImage = 1
-
 )
 
 func NewShouldSendMetricsUserElectionEvent(didUserAcceptSendingMetrics bool) (*Event, error) {
@@ -50,7 +45,7 @@ func NewShouldSendMetricsUserElectionEvent(didUserAcceptSendingMetrics bool) (*E
 
 	event, err := newEvent(installCategory, consentAction, properties)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "An error occurred creating a new user accept sending metrics event")
+		return nil, stacktrace.Propagate(err, "An error occurred creating a new should-send-metrics user election event")
 	}
 
 	return event, nil
@@ -207,7 +202,7 @@ func hashString(value string) string {
 func splitContainerImageIntoNameAndVersion(containerImage string) (string, string, error) {
 	amountOfColons := strings.Count(containerImage, containerImageSeparatorCharacter)
 	if amountOfColons != validAmountOfColonsInContainerImage{
-		return "", "", stacktrace.NewError("Invalid container image, it has '%v' colons and should has '%v'", amountOfColons, validAmountOfColonsInContainerImage)
+		return "", "", stacktrace.NewError("Invalid container image '%v', it has '%v' colons and should have '%v'", containerImage, amountOfColons, validAmountOfColonsInContainerImage)
 	}
 
 	containerImageSlice := strings.Split(containerImage, containerImageSeparatorCharacter)
