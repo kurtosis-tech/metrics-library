@@ -1,5 +1,7 @@
 # TBD
 
+# 0.1.2
+
 # 0.1.1
 ### Features
 * Added `MetricsClient` interface to define Kurtosis metrics abstraction behaviour
