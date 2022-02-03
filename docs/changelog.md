@@ -2,6 +2,8 @@
 ### Changes
 * Updated the client flush interval configuration from 10 minutes to 5 second
 
+# 0.1.2
+
 # 0.1.1
 ### Features
 * Added `MetricsClient` interface to define Kurtosis metrics abstraction behaviour
