@@ -16,7 +16,7 @@ const (
 
 	shouldTrackIdentifyUserEventWhenClientIsCreated = false
 
-	segmentClientFlushInterval = 10 * time.Minute
+	segmentClientFlushInterval = 5 * time.Second
 
 	retryBackoffBaseDuration = time.Second * 5
 	retryBackoffFactor       = 3

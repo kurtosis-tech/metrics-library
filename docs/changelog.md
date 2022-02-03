@@ -1,4 +1,6 @@
 # TBD
+### Changes
+* Updated the client flush interval configuration from 10 minutes to 5 second
 
 # 0.1.1
 ### Features
