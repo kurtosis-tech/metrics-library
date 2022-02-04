@@ -1,6 +1,10 @@
 # TBD
+### Features
+* The `CreateMetricsClient` now accepts a new argument `callback` that could be used to set a callback object
 
 # 0.1.2
+### Changes
+* Changed the value of the client flush interval
 
 # 0.1.1
 ### Features
