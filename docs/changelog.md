@@ -1,10 +1,13 @@
 # TBD
-### Features
-* The `CreateMetricsClient` now accepts a new argument `callback` that could be used to set a callback object
+### Breaking Changes
+* Added new `callback` argument in `CreateMetricsClient` method
+  * Users should send a callback object that implements the `analytics.Callback` interface
+* `CreateMetricsClient` returns a client's close function that should be used to close the client
+  * Users should receive the function and them can execute it in the next line in the code using a 'defer' sentence
 
 # 0.1.2
 ### Changes
-* Changed the value of the client flush interval
+* Updated client's queue flush interval from 10 minutes to 5 second
 
 # 0.1.1
 ### Features

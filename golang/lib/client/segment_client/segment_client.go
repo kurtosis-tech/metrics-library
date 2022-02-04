@@ -34,7 +34,9 @@ type SegmentClient struct {
 
 //The argument shouldFlushQueueOnEachEvent is used to imitate a sync request, it is not exactly the same because
 //the event is enqueued but the queue is flushed suddenly so is pretty close to event traked in sync
-func NewSegmentClient(source metrics_source.Source, sourceVersion string, userId string, shouldFlushQueueOnEachEvent bool, callback analytics.Callback) (*SegmentClient, error) {
+//The argument callbackObject is an object that will be used by the client to notify the
+// application when messages sends to the backend API succeeded or failed.
+func NewSegmentClient(source metrics_source.Source, sourceVersion string, userId string, shouldFlushQueueOnEachEvent bool, callbackObject analytics.Callback) (*SegmentClient, error) {
 
 	config := analytics.Config{
 		//The flushing interval of the client
@@ -46,9 +48,7 @@ func NewSegmentClient(source metrics_source.Source, sourceVersion string, userId
 			retryBacko := backo.NewBacko(retryBackoffBaseDuration, retryBackoffFactor, retryBackoffJitter, retryBackoffCap)
 			return retryBacko.Duration(attempt)
 		},
-		// The callback object that will be used by the client to notify the
-		// application when messages sends to the backend API succeeded or failed.
-		Callback: callback,
+		Callback: callbackObject,
 	}
 
 	if shouldFlushQueueOnEachEvent {
