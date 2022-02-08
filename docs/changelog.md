@@ -1,4 +1,6 @@
 # TBD
+
+# 0.2.0
 ### Changes
 * Moved `SegmentClient` and do `DoNothingClient` from their own package to client's package
 
