@@ -1,4 +1,4 @@
-package segment_client
+package client
 
 import (
 	"github.com/kurtosis-tech/metrics-library/golang/lib/event"
@@ -26,7 +26,7 @@ const (
 	batchSizeValueForFlushAfterEveryEvent = 1
 )
 
-type SegmentClient struct {
+type segmentClient struct {
 	client           analytics.Client
 	analyticsContext *analytics.Context
 	userID           string
@@ -34,7 +34,9 @@ type SegmentClient struct {
 
 //The argument shouldFlushQueueOnEachEvent is used to imitate a sync request, it is not exactly the same because
 //the event is enqueued but the queue is flushed suddenly so is pretty close to event traked in sync
-func NewSegmentClient(source metrics_source.Source, sourceVersion string, userId string, shouldFlushQueueOnEachEvent bool) (*SegmentClient, error) {
+//The argument callbackObject is an object that will be used by the client to notify the
+// application when messages sends to the backend API succeeded or failed.
+func newSegmentClient(source metrics_source.Source, sourceVersion string, userId string, shouldFlushQueueOnEachEvent bool, callbackObject analytics.Callback) (*segmentClient, error) {
 
 	config := analytics.Config{
 		//The flushing interval of the client
@@ -46,6 +48,7 @@ func NewSegmentClient(source metrics_source.Source, sourceVersion string, userId
 			retryBacko := backo.NewBacko(retryBackoffBaseDuration, retryBackoffFactor, retryBackoffJitter, retryBackoffCap)
 			return retryBacko.Duration(attempt)
 		},
+		Callback: callbackObject,
 	}
 
 	if shouldFlushQueueOnEachEvent {
@@ -71,10 +74,10 @@ func NewSegmentClient(source metrics_source.Source, sourceVersion string, userId
 		}
 	}
 
-	return &SegmentClient{client: client, analyticsContext: analyticsContext, userID: userId}, nil
+	return &segmentClient{client: client, analyticsContext: analyticsContext, userID: userId}, nil
 }
 
-func (segment *SegmentClient) TrackShouldSendMetricsUserElection(didUserAcceptSendingMetrics bool) error {
+func (segment *segmentClient) TrackShouldSendMetricsUserElection(didUserAcceptSendingMetrics bool) error {
 
 	newEvent, err := event.NewShouldSendMetricsUserElectionEvent(didUserAcceptSendingMetrics)
 	if err != nil {
@@ -88,7 +91,7 @@ func (segment *SegmentClient) TrackShouldSendMetricsUserElection(didUserAcceptSe
 	return nil
 }
 
-func (segment *SegmentClient) TrackCreateEnclave(enclaveId string) error {
+func (segment *segmentClient) TrackCreateEnclave(enclaveId string) error {
 
 	newEvent, err := event.NewCreateEnclaveEvent(enclaveId)
 	if err != nil {
@@ -102,7 +105,7 @@ func (segment *SegmentClient) TrackCreateEnclave(enclaveId string) error {
 	return nil
 }
 
-func (segment *SegmentClient) TrackStopEnclave(enclaveId string) error {
+func (segment *segmentClient) TrackStopEnclave(enclaveId string) error {
 	newEvent, err := event.NewStopEnclaveEvent(enclaveId)
 	if err != nil {
 		return stacktrace.Propagate(err, "An error occurred creating a new stop enclave event")
@@ -115,7 +118,7 @@ func (segment *SegmentClient) TrackStopEnclave(enclaveId string) error {
 	return nil
 }
 
-func (segment *SegmentClient) TrackDestroyEnclave(enclaveId string) error {
+func (segment *segmentClient) TrackDestroyEnclave(enclaveId string) error {
 	newEvent, err := event.NewDestroyEnclaveEvent(enclaveId)
 	if err != nil {
 		return stacktrace.Propagate(err, "An error occurred creating a new destroy enclave event")
@@ -127,7 +130,7 @@ func (segment *SegmentClient) TrackDestroyEnclave(enclaveId string) error {
 	return nil
 }
 
-func (segment *SegmentClient) TrackLoadModule(moduleId, containerImage, serializedParams string) error {
+func (segment *segmentClient) TrackLoadModule(moduleId, containerImage, serializedParams string) error {
 	newEvent, err := event.NewLoadModuleEvent(moduleId, containerImage, serializedParams)
 	if err != nil {
 		return stacktrace.Propagate(err, "An error occurred creating a new load module event")
@@ -140,7 +143,7 @@ func (segment *SegmentClient) TrackLoadModule(moduleId, containerImage, serializ
 	return nil
 }
 
-func (segment *SegmentClient) TrackUnloadModule(moduleId string) error {
+func (segment *segmentClient) TrackUnloadModule(moduleId string) error {
 	newEvent, err := event.NewUnloadModuleEvent(moduleId)
 	if err != nil {
 		return stacktrace.Propagate(err, "An error occurred creating a new unload module event")
@@ -153,7 +156,7 @@ func (segment *SegmentClient) TrackUnloadModule(moduleId string) error {
 	return nil
 }
 
-func (segment *SegmentClient) TrackExecuteModule(moduleId, serializedParams string) error {
+func (segment *segmentClient) TrackExecuteModule(moduleId, serializedParams string) error {
 	newEvent, err := event.NewExecuteModuleEvent(moduleId, serializedParams)
 	if err != nil {
 		return stacktrace.Propagate(err, "An error occurred creating a new execute module event")
@@ -168,7 +171,7 @@ func (segment *SegmentClient) TrackExecuteModule(moduleId, serializedParams stri
 	return nil
 }
 
-func (segment *SegmentClient) Close() (err error) {
+func (segment *segmentClient) close() (err error) {
 	if err := segment.client.Close(); err != nil {
 		return stacktrace.Propagate(err, "An error occurred closing the Segment client")
 	}
@@ -178,7 +181,7 @@ func (segment *SegmentClient) Close() (err error) {
 // ====================================================================================================
 // 									   Private helper methods
 // ====================================================================================================
-func (segment *SegmentClient) track(event *event.Event) error {
+func (segment *segmentClient) track(event *event.Event) error {
 
 	propertiesToTrack := analytics.NewProperties()
 

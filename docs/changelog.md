@@ -2,7 +2,21 @@
 ### Changes
 * Updated the client flush interval configuration from 10 minutes to 5 second
 
+# 0.2.0
+### Changes
+* Moved `SegmentClient` and do `DoNothingClient` from their own package to client's package
+
+### Breaking Changes
+* Added new `callback` argument in `CreateMetricsClient` method
+  * Users should send a callback object that implements the `analytics.Callback` interface
+* `CreateMetricsClient` returns a client's close function that should be used to close the client
+  * Users should receive the function and them can execute it in the next line in the code using a 'defer' sentence
+* Metrics client `Close` function is not exported anymore, now is a private method
+  * Users should use the function returned byt the `CreateMetricsClient` to close the client 
+
 # 0.1.2
+### Changes
+* Updated client's queue flush interval from 10 minutes to 5 second
 
 # 0.1.1
 ### Features
