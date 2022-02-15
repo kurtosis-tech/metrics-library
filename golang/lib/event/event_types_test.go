@@ -7,20 +7,19 @@ import (
 )
 
 const (
-	someValueToTestHash = "some value some value"
+	someValueToTestHash     = "some value some value"
 	expectedHashedSomeValue = "f9b668fec50b7eebb1319e0a2cce08ee56e5b123ace456428342d4b60dc19968"
 
 	anotherSentenceToTestHash = "It's not a simple random text."
-	expectedHashedSentence = "029f21eeab056e2e98933d2b872d2ff365e5e837876534227d534fcdba248ac7"
+	expectedHashedSentence    = "029f21eeab056e2e98933d2b872d2ff365e5e837876534227d534fcdba248ac7"
 
-
-	exampleContainerImageName    = "docker/getting-started"
-	exampleContainerImageVersion = "latest"
-	wrongExampleContainerImage   = "docker/getting-started:latest:3.2.5"
+	exampleContainerImageOrgAndRepo = "docker/getting-started"
+	exampleContainerImageTag        = "1.2.3"
+	wrongExampleContainerImage      = "docker/getting-started:latest:3.2.5"
 )
 
 var (
-	exampleContainerImage = strings.Join([]string{exampleContainerImageName, exampleContainerImageVersion} ,":")
+	exampleContainerImage = strings.Join([]string{exampleContainerImageOrgAndRepo, exampleContainerImageTag}, ":")
 )
 
 func TestHashString(t *testing.T) {
@@ -33,25 +32,20 @@ func TestHashString(t *testing.T) {
 	require.Equal(t, expectedHashedSentence, hashedSentence)
 }
 
-func TestChekIfNotEmptyStringAndGetHashedValue(t *testing.T) {
-	hashedValue, err := chekIfNotEmptyStringAndGetHashedValue(someValueToTestHash)
-
-	require.Nil(t, err)
-	require.Equal(t, expectedHashedSomeValue, hashedValue)
-
-	_, shouldBeError := chekIfNotEmptyStringAndGetHashedValue("")
-
-	require.Error(t, shouldBeError)
+func TestBestEffortSplitContainerImageIntoOrgRepoAndVersion_ImageAndTag(t *testing.T) {
+	actualContainerImageName, actualContainerImageVersion := bestEffortSplitContainerImageIntoOrgRepoAndVersion(exampleContainerImage)
+	require.Equal(t, exampleContainerImageOrgAndRepo, actualContainerImageName)
+	require.Equal(t, exampleContainerImageTag, actualContainerImageVersion)
 }
 
-func TestSplitContainerImageIntoNameAndVersion(t *testing.T) {
-	actualContainerImageName, actualContainerImageVersion, err := splitContainerImageIntoNameAndVersion(exampleContainerImage)
+func TestBestEffortSplitContainerImageIntoOrgRepoAndVersion_InvalidImage(t *testing.T) {
+	orgAndRepo, tag := bestEffortSplitContainerImageIntoOrgRepoAndVersion(wrongExampleContainerImage)
+	require.Equal(t, "", orgAndRepo)
+	require.Equal(t, "", tag)
+}
 
-	require.Nil(t, err)
-	require.Equal(t, exampleContainerImageName, actualContainerImageName)
-	require.Equal(t, exampleContainerImageVersion, actualContainerImageVersion)
-
-	_, _, shouldBeError := splitContainerImageIntoNameAndVersion(wrongExampleContainerImage)
-
-	require.Error(t, shouldBeError)
+func TestBestEffortSplitContainerImageIntoOrgRepoAndVersion_NoTag(t *testing.T) {
+	orgAndRepo, tag := bestEffortSplitContainerImageIntoOrgRepoAndVersion(exampleContainerImageOrgAndRepo)
+	require.Equal(t, exampleContainerImageOrgAndRepo, orgAndRepo)
+	require.Equal(t, dockerDefaultImageTag, tag)
 }
