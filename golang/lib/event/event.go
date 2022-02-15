@@ -1,7 +1,6 @@
 package event
 
 import (
-	"github.com/kurtosis-tech/stacktrace"
 	"strings"
 )
 
@@ -14,33 +13,28 @@ type Event struct {
 
 	//Properties' keys and values associated with the object of the action (e.g. enclave ID, module name)
 	properties map[string]string
-
 }
 
-func newEvent(category string, action string, properties map[string]string) (*Event, error) {
-
+// WARNING: It's VERY important that this doesn't return an error, else the error will propagate and
+//  lead to the event not even getting sent to Segment (which means we silently drop the event with
+//  no chance to realize what's happening!)
+func newEvent(category string, action string, properties map[string]string) *Event {
 	categoryWithoutSpaces := strings.TrimSpace(category)
-
-	if categoryWithoutSpaces == "" {
-		return nil, stacktrace.NewError("Event's category can not be empty string")
-	}
-
 	actionWithoutSpaces := strings.TrimSpace(action)
 
-	if actionWithoutSpaces == "" {
-		return nil, stacktrace.NewError("Event's action can not be empty string")
-	}
-
-	for propertyKey := range properties {
+	propertiesToSend := map[string]string{}
+	for propertyKey, propertyValue := range properties {
 		propertyKeyWithoutSpaces := strings.TrimSpace(propertyKey)
-		if propertyKeyWithoutSpaces == "" {
-			return nil, stacktrace.NewError("Property's key in an event can not be empty string")
-		}
+		propertiesToSend[propertyKeyWithoutSpaces] = propertyValue
 	}
 
-	event := &Event{category: categoryWithoutSpaces, action: actionWithoutSpaces, properties: properties}
+	event := &Event{
+		category:   categoryWithoutSpaces,
+		action:     actionWithoutSpaces,
+		properties: propertiesToSend,
+	}
 
-	return event, nil
+	return event
 }
 
 func (event *Event) GetCategory() string {
@@ -52,10 +46,9 @@ func (event *Event) GetAction() string {
 }
 
 func (event *Event) GetName() string {
-	return strings.Join([]string{event.category,event.action}, "-")
+	return strings.Join([]string{event.category, event.action}, "-")
 }
 
 func (event *Event) GetProperties() map[string]string {
 	return event.properties
 }
-
