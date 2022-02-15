@@ -1,4 +1,13 @@
 # TBD
+### Features
+* Capture the raw container image that module load occurs with
+
+### Changes
+* Don't error when things we expect to be empty are nil, so that we still at least get the data
+
+### Fixes
+* Fix bug where a module container image without `:` would throw an error which meant the event wouldn't be tracked
+* Fixed a bug where the Segment client's `ExecuteModule` event would close the underlying client
 
 # 0.2.0
 ### Changes

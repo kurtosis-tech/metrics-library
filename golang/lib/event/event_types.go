@@ -3,190 +3,129 @@ package event
 import (
 	"crypto/sha256"
 	"fmt"
-	"github.com/kurtosis-tech/stacktrace"
+	"github.com/sirupsen/logrus"
 	"strings"
 )
 
 const (
 	//We are following these naming conventions for event's data
 	//https://segment.com/docs/getting-started/04-full-install/#event-naming-best-practices
-	enclaveIDPropertyKey = "enclave_id"
-	moduleIDPropertyKey = "module_id"
-	containerImageNamePropertyKey = "container_image_name"
-	containerImageVersionPropertyKey = "container_image_version"
-	moduleParamsPropertyKey = "module_params"
-	didUserAcceptSendingMetricsKey = "did_user_accept_sending_metrics"
+	enclaveIDPropertyKey               = "enclave_id"
+	moduleIDPropertyKey                = "module_id"
+	containerRawImageStringPropertyKey = "container_raw_image_string"
+	containerImageNamePropertyKey      = "container_image_name"
+	containerImageVersionPropertyKey   = "container_image_version"
+	moduleParamsPropertyKey            = "module_params"
+	didUserAcceptSendingMetricsKey     = "did_user_accept_sending_metrics"
 
 	//Categories
 	installCategory = "install"
 	enclaveCategory = "enclave"
-	moduleCategory = "module"
+	moduleCategory  = "module"
 
 	//Actions
 	consentAction = "consent"
-	createAction = "create"
-	stopAction = "stop"
+	createAction  = "create"
+	stopAction    = "stop"
 	destroyAction = "destroy"
-	loadAction = "load"
-	unloadAction = "unload"
+	loadAction    = "load"
+	unloadAction  = "unload"
 	executeAction = "execute"
 
-	containerImageSeparatorCharacter = ":"
+	containerImageSeparatorCharacter    = ":"
 	validAmountOfColonsInContainerImage = 1
+	dockerDefaultImageTag               = "latest"
 )
 
-func NewShouldSendMetricsUserElectionEvent(didUserAcceptSendingMetrics bool) (*Event, error) {
+// WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
+// NO EVENTS SHOULD RETURN AN ERROR! Instead, each event should *always* return an event (even if the value is garbage)
+// This is becasue if we return an error, the error will propagate which means that we don't even send the event
+//  at all, which means that we'll silently drop data, which means we won't even realize that something is wrong!
+// If we send the event with garbage data, it means that we at least get the chance to notice it in our product analytics
+//  dashboards.
+// WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
 
+func NewShouldSendMetricsUserElectionEvent(didUserAcceptSendingMetrics bool) *Event {
 	didUserAcceptSendingMetricsStr := fmt.Sprintf("%v", didUserAcceptSendingMetrics)
-
 	properties := map[string]string{
 		didUserAcceptSendingMetricsKey: didUserAcceptSendingMetricsStr,
 	}
-
-	event, err := newEvent(installCategory, consentAction, properties)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "An error occurred creating a new should-send-metrics user election event")
-	}
-
-	return event, nil
+	event := newEvent(installCategory, consentAction, properties)
+	return event
 }
 
-func NewCreateEnclaveEvent(enclaveId string) (*Event, error) {
-	hashedEnclaveId, err := chekIfNotEmptyStringAndGetHashedValue(enclaveId)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "An error occurred validating and getting hashed enclave id")
-	}
-
+func NewCreateEnclaveEvent(enclaveId string) *Event {
+	hashedEnclaveId := hashString(strings.TrimSpace(enclaveId))
 	properties := map[string]string{
 		enclaveIDPropertyKey: hashedEnclaveId,
 	}
-
-	event, err := newEvent(enclaveCategory, createAction, properties)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "An error occurred creating a new create enclave event")
-	}
-
-	return event, nil
+	event := newEvent(enclaveCategory, createAction, properties)
+	return event
 }
 
-func NewStopEnclaveEvent(enclaveId string) (*Event, error) {
-	hashedEnclaveId, err := chekIfNotEmptyStringAndGetHashedValue(enclaveId)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "An error occurred validating and getting hashed enclave id")
-	}
-
+func NewStopEnclaveEvent(enclaveId string) *Event {
+	hashedEnclaveId := hashString(strings.TrimSpace(enclaveId))
 	properties := map[string]string{
 		enclaveIDPropertyKey: hashedEnclaveId,
 	}
-
-	event, err := newEvent(enclaveCategory, stopAction, properties)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "An error occurred creating a new stop enclave event")
-	}
-
-	return event, nil
+	event := newEvent(enclaveCategory, stopAction, properties)
+	return event
 }
 
-func NewDestroyEnclaveEvent(enclaveId string) (*Event, error) {
-	hashedEnclaveId, err := chekIfNotEmptyStringAndGetHashedValue(enclaveId)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "Enclave ID can not be an empty string")
-	}
-
+func NewDestroyEnclaveEvent(enclaveId string) *Event {
+	hashedEnclaveId := hashString(strings.TrimSpace(enclaveId))
 	properties := map[string]string{
 		enclaveIDPropertyKey: hashedEnclaveId,
 	}
-
-	event, err := newEvent(enclaveCategory, destroyAction, properties)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "An error occurred creating a new destroy enclave event")
-	}
-
-	return event, nil
+	event := newEvent(enclaveCategory, destroyAction, properties)
+	return event
 }
 
-func NewLoadModuleEvent(moduleId, containerImage, serializedParams string) (*Event, error) {
+func NewLoadModuleEvent(moduleId, containerImage, serializedParams string) *Event {
+	hashedModuleId := hashString(strings.TrimSpace(moduleId))
 
-	hashedModuleId, err := chekIfNotEmptyStringAndGetHashedValue(moduleId)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "Module ID can not be an empty string")
+	containerImageWithoutSpaces := strings.TrimSpace(containerImage)
+	containerImageOrgAndRepo, containerImageTag := bestEffortSplitContainerImageIntoOrgRepoAndVersion(containerImageWithoutSpaces)
+
+	hashedSerializedParams := hashString(serializedParams)
+	properties := map[string]string{
+		moduleIDPropertyKey:                hashedModuleId,
+		containerRawImageStringPropertyKey: containerImage,
+		containerImageNamePropertyKey:      containerImageOrgAndRepo,
+		containerImageVersionPropertyKey:   containerImageTag,
+		moduleParamsPropertyKey:            hashedSerializedParams,
 	}
 
-	containerImageName, containerImageVersion, err := splitContainerImageIntoNameAndVersion(containerImage)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "An error occurred splitting container image '%v' into image name and image version", containerImage)
+	event := newEvent(moduleCategory, loadAction, properties)
+	return event
+}
+
+func NewUnloadModuleEvent(moduleId string) *Event {
+	hashedModuleId := hashString(strings.TrimSpace(moduleId))
+	properties := map[string]string{
+		moduleIDPropertyKey: hashedModuleId,
 	}
+	event := newEvent(moduleCategory, unloadAction, properties)
+	return event
+}
+
+func NewExecuteModuleEvent(moduleId, serializedParams string) *Event {
+	hashedModuleId := hashString(strings.TrimSpace(moduleId))
 
 	hashedSerializedParams := hashString(serializedParams)
 
 	properties := map[string]string{
-		moduleIDPropertyKey: hashedModuleId,
-		containerImageNamePropertyKey: containerImageName,
-		containerImageVersionPropertyKey: containerImageVersion,
+		moduleIDPropertyKey:     hashedModuleId,
 		moduleParamsPropertyKey: hashedSerializedParams,
 	}
 
-	event, err := newEvent(moduleCategory, loadAction, properties)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "An error occurred creating a new load module event")
-	}
-	return event, nil
-}
-
-func NewUnloadModuleEvent(moduleId string) (*Event, error) {
-
-	hashedModuleId, err := chekIfNotEmptyStringAndGetHashedValue(moduleId)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "Module ID can not be an empty string")
-	}
-
-	properties := map[string]string{
-		moduleIDPropertyKey: hashedModuleId,
-	}
-
-	event, err := newEvent(moduleCategory, unloadAction, properties)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "An error occurred creating a new unload module event")
-	}
-	return event, nil
-}
-
-func NewExecuteModuleEvent(moduleId, serializedParams string) (*Event, error) {
-
-	hashedModuleId, err := chekIfNotEmptyStringAndGetHashedValue(moduleId)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "Module ID can not be an empty string")
-	}
-
-	hashedSerializedParams := hashString(serializedParams)
-
-	properties := map[string]string{
-		moduleIDPropertyKey: hashedModuleId,
-		moduleParamsPropertyKey: hashedSerializedParams,
-	}
-
-	event, err := newEvent(moduleCategory, executeAction, properties)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "An error occurred creating a new execute module event")
-	}
-	return event, nil
+	event := newEvent(moduleCategory, executeAction, properties)
+	return event
 }
 
 // ================================================================================================
 //                                  Private Helper Functions
 // ================================================================================================
-func chekIfNotEmptyStringAndGetHashedValue(value string) (string, error)  {
-	valueWithoutSpaces := strings.TrimSpace(value)
-
-	if valueWithoutSpaces == "" {
-		return "", stacktrace.NewError("Invalid value, it can not be an empty string")
-	}
-
-	hashedValue := hashString(value)
-
-	return hashedValue, nil
-}
-
 func hashString(value string) string {
 	hash := sha256.New()
 
@@ -199,13 +138,19 @@ func hashString(value string) string {
 	return hexValue
 }
 
-func splitContainerImageIntoNameAndVersion(containerImage string) (string, string, error) {
+// Makes a best-effort attempt to split the container image spec into org-and-repo and tag, returning
+//  emptystrings if it's not successful
+func bestEffortSplitContainerImageIntoOrgRepoAndVersion(containerImage string) (resultOrgAndRepo string, resultTag string) {
 	amountOfColons := strings.Count(containerImage, containerImageSeparatorCharacter)
-	if amountOfColons != validAmountOfColonsInContainerImage{
-		return "", "", stacktrace.NewError("Invalid container image '%v', it has '%v' colons and should have '%v'", containerImage, amountOfColons, validAmountOfColonsInContainerImage)
+	if amountOfColons == 0 {
+		containerImage = containerImage + containerImageSeparatorCharacter + dockerDefaultImageTag
+	}
+	if amountOfColons > validAmountOfColonsInContainerImage {
+		logrus.Debugf("Invalid container image '%v', it has '%v' colons and should have '%v'", containerImage, amountOfColons, validAmountOfColonsInContainerImage)
+		return "", ""
 	}
 
 	containerImageSlice := strings.Split(containerImage, containerImageSeparatorCharacter)
 
-	return containerImageSlice[0], containerImageSlice[1], nil
+	return containerImageSlice[0], containerImageSlice[1]
 }

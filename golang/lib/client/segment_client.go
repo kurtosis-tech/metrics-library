@@ -78,12 +78,7 @@ func newSegmentClient(source metrics_source.Source, sourceVersion string, userId
 }
 
 func (segment *segmentClient) TrackShouldSendMetricsUserElection(didUserAcceptSendingMetrics bool) error {
-
-	newEvent, err := event.NewShouldSendMetricsUserElectionEvent(didUserAcceptSendingMetrics)
-	if err != nil {
-		return stacktrace.Propagate(err, "An error occurred creating a new should-send-metrics user election event")
-	}
-
+	newEvent := event.NewShouldSendMetricsUserElectionEvent(didUserAcceptSendingMetrics)
 	if err := segment.track(newEvent); err != nil {
 		return stacktrace.Propagate(err, "An error occurred tracking should-send-metrics user election")
 	}
@@ -92,38 +87,24 @@ func (segment *segmentClient) TrackShouldSendMetricsUserElection(didUserAcceptSe
 }
 
 func (segment *segmentClient) TrackCreateEnclave(enclaveId string) error {
-
-	newEvent, err := event.NewCreateEnclaveEvent(enclaveId)
-	if err != nil {
-		return stacktrace.Propagate(err, "An error occurred creating a new create enclave event")
-	}
+	newEvent := event.NewCreateEnclaveEvent(enclaveId)
 
 	if err := segment.track(newEvent); err != nil {
 		return stacktrace.Propagate(err, "An error occurred tracking create enclave event")
 	}
-
 	return nil
 }
 
 func (segment *segmentClient) TrackStopEnclave(enclaveId string) error {
-	newEvent, err := event.NewStopEnclaveEvent(enclaveId)
-	if err != nil {
-		return stacktrace.Propagate(err, "An error occurred creating a new stop enclave event")
-	}
-
+	newEvent := event.NewStopEnclaveEvent(enclaveId)
 	if err := segment.track(newEvent); err != nil {
 		return stacktrace.Propagate(err, "An error occurred tracking stop enclave event")
 	}
-
 	return nil
 }
 
 func (segment *segmentClient) TrackDestroyEnclave(enclaveId string) error {
-	newEvent, err := event.NewDestroyEnclaveEvent(enclaveId)
-	if err != nil {
-		return stacktrace.Propagate(err, "An error occurred creating a new destroy enclave event")
-	}
-
+	newEvent := event.NewDestroyEnclaveEvent(enclaveId)
 	if err := segment.track(newEvent); err != nil {
 		return stacktrace.Propagate(err, "An error occurred tracking destroy enclave event")
 	}
@@ -131,43 +112,26 @@ func (segment *segmentClient) TrackDestroyEnclave(enclaveId string) error {
 }
 
 func (segment *segmentClient) TrackLoadModule(moduleId, containerImage, serializedParams string) error {
-	newEvent, err := event.NewLoadModuleEvent(moduleId, containerImage, serializedParams)
-	if err != nil {
-		return stacktrace.Propagate(err, "An error occurred creating a new load module event")
-	}
-
+	newEvent := event.NewLoadModuleEvent(moduleId, containerImage, serializedParams)
 	if err := segment.track(newEvent); err != nil {
 		return stacktrace.Propagate(err, "An error occurred tracking load module event")
 	}
-
 	return nil
 }
 
 func (segment *segmentClient) TrackUnloadModule(moduleId string) error {
-	newEvent, err := event.NewUnloadModuleEvent(moduleId)
-	if err != nil {
-		return stacktrace.Propagate(err, "An error occurred creating a new unload module event")
-	}
-
+	newEvent := event.NewUnloadModuleEvent(moduleId)
 	if err := segment.track(newEvent); err != nil {
 		return stacktrace.Propagate(err, "An error occurred tracking unload module event")
 	}
-
 	return nil
 }
 
 func (segment *segmentClient) TrackExecuteModule(moduleId, serializedParams string) error {
-	newEvent, err := event.NewExecuteModuleEvent(moduleId, serializedParams)
-	if err != nil {
-		return stacktrace.Propagate(err, "An error occurred creating a new execute module event")
-	}
-
+	newEvent := event.NewExecuteModuleEvent(moduleId, serializedParams)
 	if err := segment.track(newEvent); err != nil {
 		return stacktrace.Propagate(err, "An error occurred tracking execute module event")
 	}
-
-	segment.client.Close()
-
 	return nil
 }
 
