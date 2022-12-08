@@ -17,7 +17,7 @@ const (
 	containerImageVersionPropertyKey   = "container_image_version"
 	moduleParamsPropertyKey            = "module_params"
 	didUserAcceptSendingMetricsKey     = "did_user_accept_sending_metrics"
-	starlarkArgsKey                    = "starlark_args"
+	starlarkArgsKey                    = "args"
 	packageIdKey                       = "package_id"
 	isRemotePackageKey                 = "is_remote_package"
 	starlarkSerializedScriptKey        = "serialized_script"
@@ -141,7 +141,7 @@ func NewRunStarlarkPackage(packageId string, serializedArgs string, isRemote boo
 		starlarkArgsKey:    hashedSerializedArgs,
 		packageIdKey:       hashedPackageId,
 		isRemotePackageKey: isRemotePackageStr,
-		isDryRunStr:        isDryRunStr,
+		isDryRunKey:        isDryRunStr,
 	}
 
 	event := newEvent(starlarkPackageCategory, runAction, properties)
@@ -156,7 +156,7 @@ func NewRunStarlarkScript(serializedScript string, serializedArgs string, isDryR
 	properties := map[string]string{
 		starlarkArgsKey:             hashedSerializedArgs,
 		starlarkSerializedScriptKey: hashedSerializedScript,
-		isDryRunStr:                 isDryRunStr,
+		isDryRunKey:                 isDryRunStr,
 	}
 	event := newEvent(starlarkScriptCategory, runAction, properties)
 	return event
