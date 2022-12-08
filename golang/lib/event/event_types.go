@@ -18,9 +18,10 @@ const (
 	moduleParamsPropertyKey            = "module_params"
 	didUserAcceptSendingMetricsKey     = "did_user_accept_sending_metrics"
 	starlarkArgsKey                    = "starlark_args"
-	packageIdOrPathKey                 = "package_path_or_id_key"
+	packageIdKey                       = "package_id"
 	isRemotePackageKey                 = "is_remote_package"
 	starlarkSerializedScriptKey        = "serialized_script"
+	isDryRunKey                        = "is_dry_run"
 
 	//Categories
 	installCategory         = "install"
@@ -130,28 +131,32 @@ func NewExecuteModuleEvent(moduleId, serializedParams string) *Event {
 	return event
 }
 
-func NewRunStarlarkPackage(isRemote bool, packageIdOrPath, serializedArgs string) *Event {
-	hashedPackageIdOrPath := hashString(strings.TrimSpace(packageIdOrPath))
+func NewRunStarlarkPackage(isRemote bool, packageId string, serializedArgs string, isDryRun bool) *Event {
+	hashedPackageId := hashString(strings.TrimSpace(packageId))
 	hashedSerializedArgs := hashString(strings.TrimSpace(serializedArgs))
 	isRemotePackageStr := fmt.Sprintf("%v", isRemote)
+	isDryRunStr := fmt.Sprintf("%v", isDryRun)
 
 	properties := map[string]string{
 		starlarkArgsKey:    hashedSerializedArgs,
-		packageIdOrPathKey: hashedPackageIdOrPath,
+		packageIdKey:       hashedPackageId,
 		isRemotePackageKey: isRemotePackageStr,
+		isDryRunStr:        isDryRunStr,
 	}
 
 	event := newEvent(starlarkPackageCategory, runAction, properties)
 	return event
 }
 
-func NewRunStarlarkScript(serializedScript string, serializedArgs string) *Event {
+func NewRunStarlarkScript(serializedScript string, serializedArgs string, isDryRun bool) *Event {
 	hashedSerializedScript := hashString(strings.TrimSpace(serializedScript))
 	hashedSerializedArgs := hashString(strings.TrimSpace(serializedArgs))
+	isDryRunStr := fmt.Sprintf("%v", isDryRun)
 
 	properties := map[string]string{
 		starlarkArgsKey:             hashedSerializedArgs,
 		starlarkSerializedScriptKey: hashedSerializedScript,
+		isDryRunStr:                 isDryRunStr,
 	}
 	event := newEvent(starlarkScriptCategory, runAction, properties)
 	return event

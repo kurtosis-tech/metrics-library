@@ -135,16 +135,16 @@ func (segment *segmentClient) TrackExecuteModule(moduleId, serializedParams stri
 	return nil
 }
 
-func (segment *segmentClient) TrackRunStarlarkPackage(isRemote bool, packageIdOrPath, serializedArgs string) error {
-	newEvent := event.NewRunStarlarkPackage(isRemote, packageIdOrPath, serializedArgs)
+func (segment *segmentClient) TrackRunStarlarkPackage(isRemote bool, packageId, serializedArgs string, isDryRun bool) error {
+	newEvent := event.NewRunStarlarkPackage(isRemote, packageId, serializedArgs, isDryRun)
 	if err := segment.track(newEvent); err != nil {
 		return stacktrace.Propagate(err, "An error occurred tracking run starlark package event")
 	}
 	return nil
 }
 
-func (segment *segmentClient) TrackRunStarlarkScript(serializedScript string, serializedArgs string) error {
-	newEvent := event.NewRunStarlarkScript(serializedScript, serializedArgs)
+func (segment *segmentClient) TrackRunStarlarkScript(serializedScript string, serializedArgs string, isDryRun bool) error {
+	newEvent := event.NewRunStarlarkScript(serializedScript, serializedArgs, isDryRun)
 	if err := segment.track(newEvent); err != nil {
 		return stacktrace.Propagate(err, "An error occurred tracking run starlark script event")
 	}
