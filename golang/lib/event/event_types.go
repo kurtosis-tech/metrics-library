@@ -131,7 +131,7 @@ func NewExecuteModuleEvent(moduleId, serializedParams string) *Event {
 	return event
 }
 
-func NewRunStarlarkPackage(isRemote bool, packageId string, serializedArgs string, isDryRun bool) *Event {
+func NewRunStarlarkPackage(packageId string, serializedArgs string, isRemote bool, isDryRun bool) *Event {
 	hashedPackageId := hashString(strings.TrimSpace(packageId))
 	hashedSerializedArgs := hashString(strings.TrimSpace(serializedArgs))
 	isRemotePackageStr := fmt.Sprintf("%v", isRemote)

@@ -8,7 +8,7 @@ type MetricsClient interface {
 	TrackLoadModule(moduleId, containerImage, serializedParams string) error
 	TrackExecuteModule(moduleId, serializedParams string) error
 	TrackUnloadModule(moduleId string) error
-	TrackRunStarlarkPackage(isRemote bool, packageId string, serializedArgs string, isDryRun bool) error
+	TrackRunStarlarkPackage(packageId string, serializedArgs string, isRemote bool, isDryRun bool) error
 	TrackRunStarlarkScript(serializedScript string, serializedArgs string, isDryRun bool) error
 	close() (err error)
 }
