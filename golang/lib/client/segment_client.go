@@ -32,9 +32,9 @@ type segmentClient struct {
 	userID           string
 }
 
-//The argument shouldFlushQueueOnEachEvent is used to imitate a sync request, it is not exactly the same because
-//the event is enqueued but the queue is flushed suddenly so is pretty close to event traked in sync
-//The argument callbackObject is an object that will be used by the client to notify the
+// The argument shouldFlushQueueOnEachEvent is used to imitate a sync request, it is not exactly the same because
+// the event is enqueued but the queue is flushed suddenly so is pretty close to event traked in sync
+// The argument callbackObject is an object that will be used by the client to notify the
 // application when messages sends to the backend API succeeded or failed.
 func newSegmentClient(source metrics_source.Source, sourceVersion string, userId string, shouldFlushQueueOnEachEvent bool, callbackObject analytics.Callback) (*segmentClient, error) {
 
@@ -135,6 +135,22 @@ func (segment *segmentClient) TrackExecuteModule(moduleId, serializedParams stri
 	return nil
 }
 
+func (segment *segmentClient) TrackRunStarlarkPackage(isRemote bool, packageIdOrPath, serializedArgs string) error {
+	newEvent := event.NewRunStarlarkPackage(isRemote, packageIdOrPath, serializedArgs)
+	if err := segment.track(newEvent); err != nil {
+		return stacktrace.Propagate(err, "An error occurred tracking run starlark package event")
+	}
+	return nil
+}
+
+func (segment *segmentClient) TrackRunStarlarkScript(serializedScript string, serializedArgs string) error {
+	newEvent := event.NewRunStarlarkScript(serializedScript, serializedArgs)
+	if err := segment.track(newEvent); err != nil {
+		return stacktrace.Propagate(err, "An error occurred tracking run starlark script event")
+	}
+	return nil
+}
+
 func (segment *segmentClient) close() (err error) {
 	if err := segment.client.Close(); err != nil {
 		return stacktrace.Propagate(err, "An error occurred closing the Segment client")
@@ -143,7 +159,9 @@ func (segment *segmentClient) close() (err error) {
 }
 
 // ====================================================================================================
-// 									   Private helper methods
+//
+//	Private helper methods
+//
 // ====================================================================================================
 func (segment *segmentClient) track(event *event.Event) error {
 

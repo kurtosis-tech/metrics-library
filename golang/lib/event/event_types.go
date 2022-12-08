@@ -17,11 +17,17 @@ const (
 	containerImageVersionPropertyKey   = "container_image_version"
 	moduleParamsPropertyKey            = "module_params"
 	didUserAcceptSendingMetricsKey     = "did_user_accept_sending_metrics"
+	starlarkArgsKey                    = "starlark_args"
+	packageIdOrPathKey                 = "package_path_or_id_key"
+	isRemotePackageKey                 = "is_remote_package"
+	starlarkSerializedScriptKey        = "serialized_script"
 
 	//Categories
-	installCategory = "install"
-	enclaveCategory = "enclave"
-	moduleCategory  = "module"
+	installCategory         = "install"
+	enclaveCategory         = "enclave"
+	moduleCategory          = "module"
+	starlarkPackageCategory = "package"
+	starlarkScriptCategory  = "script"
 
 	//Actions
 	consentAction = "consent"
@@ -31,6 +37,7 @@ const (
 	loadAction    = "load"
 	unloadAction  = "unload"
 	executeAction = "execute"
+	runAction     = "run"
 
 	containerImageSeparatorCharacter    = ":"
 	validAmountOfColonsInContainerImage = 1
@@ -123,8 +130,37 @@ func NewExecuteModuleEvent(moduleId, serializedParams string) *Event {
 	return event
 }
 
+func NewRunStarlarkPackage(isRemote bool, packageIdOrPath, serializedArgs string) *Event {
+	hashedPackageIdOrPath := hashString(strings.TrimSpace(packageIdOrPath))
+	hashedSerializedArgs := hashString(strings.TrimSpace(serializedArgs))
+	isRemotePackageStr := fmt.Sprintf("%v", isRemote)
+
+	properties := map[string]string{
+		starlarkArgsKey:    hashedSerializedArgs,
+		packageIdOrPathKey: hashedPackageIdOrPath,
+		isRemotePackageKey: isRemotePackageStr,
+	}
+
+	event := newEvent(starlarkPackageCategory, runAction, properties)
+	return event
+}
+
+func NewRunStarlarkScript(serializedScript string, serializedArgs string) *Event {
+	hashedSerializedScript := hashString(strings.TrimSpace(serializedScript))
+	hashedSerializedArgs := hashString(strings.TrimSpace(serializedArgs))
+
+	properties := map[string]string{
+		starlarkArgsKey:             hashedSerializedArgs,
+		starlarkSerializedScriptKey: hashedSerializedScript,
+	}
+	event := newEvent(starlarkScriptCategory, runAction, properties)
+	return event
+}
+
 // ================================================================================================
-//                                  Private Helper Functions
+//
+//	Private Helper Functions
+//
 // ================================================================================================
 func hashString(value string) string {
 	hash := sha256.New()
@@ -139,7 +175,8 @@ func hashString(value string) string {
 }
 
 // Makes a best-effort attempt to split the container image spec into org-and-repo and tag, returning
-//  emptystrings if it's not successful
+//
+//	emptystrings if it's not successful
 func bestEffortSplitContainerImageIntoOrgRepoAndVersion(containerImage string) (resultOrgAndRepo string, resultTag string) {
 	amountOfColons := strings.Count(containerImage, containerImageSeparatorCharacter)
 	if amountOfColons == 0 {

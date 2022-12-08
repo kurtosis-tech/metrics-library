@@ -1,5 +1,8 @@
 # TBD
 
+### Features
+- Added metrics tracking for `RunStarlarkScript` and `RunStarlarkPackage`
+
 # 0.2.1
 ### Features
 * Capture the raw container image that module load occurs with
