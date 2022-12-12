@@ -131,15 +131,12 @@ func NewExecuteModuleEvent(moduleId, serializedParams string) *Event {
 	return event
 }
 
-func NewRunStarlarkPackage(packageId string, serializedArgs string, isRemote bool, isDryRun bool) *Event {
-	hashedPackageId := hashString(strings.TrimSpace(packageId))
-	hashedSerializedArgs := hashString(strings.TrimSpace(serializedArgs))
+func NewRunStarlarkPackageEvent(packageId string, isRemote bool, isDryRun bool) *Event {
 	isRemotePackageStr := fmt.Sprintf("%v", isRemote)
 	isDryRunStr := fmt.Sprintf("%v", isDryRun)
 
 	properties := map[string]string{
-		starlarkArgsKey:    hashedSerializedArgs,
-		packageIdKey:       hashedPackageId,
+		packageIdKey:       packageId,
 		isRemotePackageKey: isRemotePackageStr,
 		isDryRunKey:        isDryRunStr,
 	}
@@ -148,15 +145,11 @@ func NewRunStarlarkPackage(packageId string, serializedArgs string, isRemote boo
 	return event
 }
 
-func NewRunStarlarkScript(serializedScript string, serializedArgs string, isDryRun bool) *Event {
-	hashedSerializedScript := hashString(strings.TrimSpace(serializedScript))
-	hashedSerializedArgs := hashString(strings.TrimSpace(serializedArgs))
+func NewRunStarlarkScriptEvent(isDryRun bool) *Event {
 	isDryRunStr := fmt.Sprintf("%v", isDryRun)
 
 	properties := map[string]string{
-		starlarkArgsKey:             hashedSerializedArgs,
-		starlarkSerializedScriptKey: hashedSerializedScript,
-		isDryRunKey:                 isDryRunStr,
+		isDryRunKey: isDryRunStr,
 	}
 	event := newEvent(starlarkScriptCategory, runAction, properties)
 	return event
