@@ -23,9 +23,12 @@ const (
 	isScriptKey                        = "is_script"
 
 	//Categories
-	installCategory  = "install"
-	enclaveCategory  = "enclave"
-	moduleCategory   = "module"
+	installCategory = "install"
+	enclaveCategory = "enclave"
+	moduleCategory  = "module"
+	// the Kurtosis category is for commands at the root level of the cli
+	// we went this way cause this is in pattern with other categories above
+	// any further root level commands should use this category
 	kurtosisCategory = "kurtosis"
 
 	//Actions
