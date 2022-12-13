@@ -1,5 +1,7 @@
 # TBD
 
+# 0.2.2
+
 ### Features
 - Added metrics tracking for `RunStarlarkScript` and `RunStarlarkPackage`
 
