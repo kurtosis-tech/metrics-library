@@ -138,7 +138,7 @@ func (segment *segmentClient) TrackExecuteModule(moduleId, serializedParams stri
 func (segment *segmentClient) TrackKurtosisRun(packageId string, isRemote bool, isDryRun bool, isScript bool) error {
 	newEvent := event.NewKurtosisRunEvent(packageId, isRemote, isDryRun, isScript)
 	if err := segment.track(newEvent); err != nil {
-		return stacktrace.Propagate(err, "An error occurred tracking run starlark package event")
+		return stacktrace.Propagate(err, "An error occurred tracking run kurtosis event")
 	}
 	return nil
 }
