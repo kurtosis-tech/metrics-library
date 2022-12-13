@@ -55,14 +55,8 @@ func (client *doNothingClient) TrackExecuteModule(moduleId, serializedParams str
 	return nil
 }
 
-func (client *doNothingClient) TrackRunStarlarkPackage(packageId string, serializedArgs string, isRemote bool, isDryRun bool) error {
-	logrus.Debugf("Do-nothing metrics client TrackRunStarlarkPackage called with arguments packageId '%v', serializedArgs '%v', isRemote '%v' and isDryrun '%v'; skipping sending event", packageId, serializedArgs, isRemote, isDryRun)
-	client.callback.Success()
-	return nil
-}
-
-func (client *doNothingClient) TrackRunStarlarkScript(serializedScript string, serializedArgs string, isDryRun bool) error {
-	logrus.Debugf("Do-nothing metrics client TrackRunStarlarkScript with arguments serializedScript '%v', serializedArgs '%v' and isDryRun '%v'; skipping sending event", serializedScript, serializedArgs, isDryRun)
+func (client *doNothingClient) TrackKurtosisRun(packageId string, isRemote bool, isDryRun bool, isScript bool) error {
+	logrus.Debugf("Do-nothing metrics client TrackKurtosisRun called with arguments packageId '%v', isRemote '%v', isDryRun '%v' and isScript '%v'; skipping sending event", packageId, isRemote, isDryRun, isScript)
 	client.callback.Success()
 	return nil
 }

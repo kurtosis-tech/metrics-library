@@ -17,18 +17,16 @@ const (
 	containerImageVersionPropertyKey   = "container_image_version"
 	moduleParamsPropertyKey            = "module_params"
 	didUserAcceptSendingMetricsKey     = "did_user_accept_sending_metrics"
-	starlarkArgsKey                    = "args"
 	packageIdKey                       = "package_id"
 	isRemotePackageKey                 = "is_remote_package"
-	starlarkSerializedScriptKey        = "serialized_script"
 	isDryRunKey                        = "is_dry_run"
+	isScriptKey                        = "is_script"
 
 	//Categories
-	installCategory         = "install"
-	enclaveCategory         = "enclave"
-	moduleCategory          = "module"
-	starlarkPackageCategory = "package"
-	starlarkScriptCategory  = "script"
+	installCategory  = "install"
+	enclaveCategory  = "enclave"
+	moduleCategory   = "module"
+	kurtosisCategory = "kurtosis"
 
 	//Actions
 	consentAction = "consent"
@@ -131,27 +129,19 @@ func NewExecuteModuleEvent(moduleId, serializedParams string) *Event {
 	return event
 }
 
-func NewRunStarlarkPackageEvent(packageId string, isRemote bool, isDryRun bool) *Event {
+func NewKurtosisRunEvent(packageId string, isRemote bool, isDryRun bool, isScript bool) *Event {
 	isRemotePackageStr := fmt.Sprintf("%v", isRemote)
 	isDryRunStr := fmt.Sprintf("%v", isDryRun)
+	isScriptStr := fmt.Sprintf("%v", isScript)
 
 	properties := map[string]string{
 		packageIdKey:       packageId,
 		isRemotePackageKey: isRemotePackageStr,
 		isDryRunKey:        isDryRunStr,
+		isScriptKey:        isScriptStr,
 	}
 
-	event := newEvent(starlarkPackageCategory, runAction, properties)
-	return event
-}
-
-func NewRunStarlarkScriptEvent(isDryRun bool) *Event {
-	isDryRunStr := fmt.Sprintf("%v", isDryRun)
-
-	properties := map[string]string{
-		isDryRunKey: isDryRunStr,
-	}
-	event := newEvent(starlarkScriptCategory, runAction, properties)
+	event := newEvent(kurtosisCategory, runAction, properties)
 	return event
 }
 
