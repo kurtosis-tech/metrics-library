@@ -17,11 +17,19 @@ const (
 	containerImageVersionPropertyKey   = "container_image_version"
 	moduleParamsPropertyKey            = "module_params"
 	didUserAcceptSendingMetricsKey     = "did_user_accept_sending_metrics"
+	packageIdKey                       = "package_id"
+	isRemotePackageKey                 = "is_remote_package"
+	isDryRunKey                        = "is_dry_run"
+	isScriptKey                        = "is_script"
 
 	//Categories
 	installCategory = "install"
 	enclaveCategory = "enclave"
 	moduleCategory  = "module"
+	// the Kurtosis category is for commands at the root level of the cli
+	// we went this way cause this is in pattern with other categories above
+	// any further root level commands should use this category
+	kurtosisCategory = "kurtosis"
 
 	//Actions
 	consentAction = "consent"
@@ -31,6 +39,7 @@ const (
 	loadAction    = "load"
 	unloadAction  = "unload"
 	executeAction = "execute"
+	runAction     = "run"
 
 	containerImageSeparatorCharacter    = ":"
 	validAmountOfColonsInContainerImage = 1
@@ -123,8 +132,26 @@ func NewExecuteModuleEvent(moduleId, serializedParams string) *Event {
 	return event
 }
 
+func NewKurtosisRunEvent(packageId string, isRemote bool, isDryRun bool, isScript bool) *Event {
+	isRemotePackageStr := fmt.Sprintf("%v", isRemote)
+	isDryRunStr := fmt.Sprintf("%v", isDryRun)
+	isScriptStr := fmt.Sprintf("%v", isScript)
+
+	properties := map[string]string{
+		packageIdKey:       packageId,
+		isRemotePackageKey: isRemotePackageStr,
+		isDryRunKey:        isDryRunStr,
+		isScriptKey:        isScriptStr,
+	}
+
+	event := newEvent(kurtosisCategory, runAction, properties)
+	return event
+}
+
 // ================================================================================================
-//                                  Private Helper Functions
+//
+//	Private Helper Functions
+//
 // ================================================================================================
 func hashString(value string) string {
 	hash := sha256.New()
@@ -139,7 +166,8 @@ func hashString(value string) string {
 }
 
 // Makes a best-effort attempt to split the container image spec into org-and-repo and tag, returning
-//  emptystrings if it's not successful
+//
+//	emptystrings if it's not successful
 func bestEffortSplitContainerImageIntoOrgRepoAndVersion(containerImage string) (resultOrgAndRepo string, resultTag string) {
 	amountOfColons := strings.Count(containerImage, containerImageSeparatorCharacter)
 	if amountOfColons == 0 {

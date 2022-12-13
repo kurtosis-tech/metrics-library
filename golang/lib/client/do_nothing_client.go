@@ -2,9 +2,9 @@ package client
 
 import "github.com/sirupsen/logrus"
 
-//doNothingClient: This metrics client implementation has been created for instantiate when user rejects
-//sending metrics, so it doesn't really track metrics the only logic that it contains is loging
-//the traking methods calls. It also can be used for test purpose
+// doNothingClient: This metrics client implementation has been created for instantiate when user rejects
+// sending metrics, so it doesn't really track metrics the only logic that it contains is loging
+// the traking methods calls. It also can be used for test purpose
 type doNothingClient struct {
 	callback Callback
 }
@@ -51,6 +51,12 @@ func (client *doNothingClient) TrackUnloadModule(moduleId string) error {
 
 func (client *doNothingClient) TrackExecuteModule(moduleId, serializedParams string) error {
 	logrus.Debugf("Do-nothing metrics client TrackExecuteModule called with argument moduleId '%v' and serializedParams '%v'; skipping sending event", moduleId, serializedParams)
+	client.callback.Success()
+	return nil
+}
+
+func (client *doNothingClient) TrackKurtosisRun(packageId string, isRemote bool, isDryRun bool, isScript bool) error {
+	logrus.Debugf("Do-nothing metrics client TrackKurtosisRun called with arguments packageId '%v', isRemote '%v', isDryRun '%v' and isScript '%v'; skipping sending event", packageId, isRemote, isDryRun, isScript)
 	client.callback.Success()
 	return nil
 }
