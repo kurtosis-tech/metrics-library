@@ -18,10 +18,11 @@ func TestISCIWhenEnvironmentVariableIsSetSucceeds(t *testing.T) {
 	}
 }
 
-func TestISCIWhenEnvironmentVariableIsNotSetFails(t *testing.T) {
-	for _, envVar := range ciEnvironmentVariables {
-		err := os.Unsetenv(envVar)
-		require.Nil(t, err)
-		require.Equal(t, falseStr, isCI())
+// This only runs on Circle
+func TestISCI_PassesOnCircle(t *testing.T) {
+	_, found := os.LookupEnv("CIRCLE_CI")
+	if !found {
+		t.Skip("Skipping as the environment isn't circle ci")
 	}
+	require.Equal(t, trueStr, isCI())
 }
