@@ -34,6 +34,8 @@ const (
 	containerImageSeparatorCharacter    = ":"
 	validAmountOfColonsInContainerImage = 1
 	dockerDefaultImageTag               = "latest"
+
+	isCIKey = "is_ci"
 )
 
 // WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
