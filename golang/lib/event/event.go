@@ -4,6 +4,8 @@ import (
 	"strings"
 )
 
+const isCIKey = "is_ci"
+
 type Event struct {
 	//Category of event (e.g. enclave, module)
 	category string
