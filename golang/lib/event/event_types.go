@@ -3,29 +3,22 @@ package event
 import (
 	"crypto/sha256"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"strings"
 )
 
 const (
 	//We are following these naming conventions for event's data
 	//https://segment.com/docs/getting-started/04-full-install/#event-naming-best-practices
-	enclaveIDPropertyKey               = "enclave_id"
-	moduleIDPropertyKey                = "module_id"
-	containerRawImageStringPropertyKey = "container_raw_image_string"
-	containerImageNamePropertyKey      = "container_image_name"
-	containerImageVersionPropertyKey   = "container_image_version"
-	moduleParamsPropertyKey            = "module_params"
-	didUserAcceptSendingMetricsKey     = "did_user_accept_sending_metrics"
-	packageIdKey                       = "package_id"
-	isRemotePackageKey                 = "is_remote_package"
-	isDryRunKey                        = "is_dry_run"
-	isScriptKey                        = "is_script"
+	enclaveIDPropertyKey           = "enclave_id"
+	didUserAcceptSendingMetricsKey = "did_user_accept_sending_metrics"
+	packageIdKey                   = "package_id"
+	isRemotePackageKey             = "is_remote_package"
+	isDryRunKey                    = "is_dry_run"
+	isScriptKey                    = "is_script"
 
 	//Categories
 	installCategory = "install"
 	enclaveCategory = "enclave"
-	moduleCategory  = "module"
 	// the Kurtosis category is for commands at the root level of the cli
 	// we went this way cause this is in pattern with other categories above
 	// any further root level commands should use this category
@@ -36,9 +29,6 @@ const (
 	createAction  = "create"
 	stopAction    = "stop"
 	destroyAction = "destroy"
-	loadAction    = "load"
-	unloadAction  = "unload"
-	executeAction = "execute"
 	runAction     = "run"
 
 	containerImageSeparatorCharacter    = ":"
@@ -90,48 +80,6 @@ func NewDestroyEnclaveEvent(enclaveId string) *Event {
 	return event
 }
 
-func NewLoadModuleEvent(moduleId, containerImage, serializedParams string) *Event {
-	hashedModuleId := hashString(strings.TrimSpace(moduleId))
-
-	containerImageWithoutSpaces := strings.TrimSpace(containerImage)
-	containerImageOrgAndRepo, containerImageTag := bestEffortSplitContainerImageIntoOrgRepoAndVersion(containerImageWithoutSpaces)
-
-	hashedSerializedParams := hashString(serializedParams)
-	properties := map[string]string{
-		moduleIDPropertyKey:                hashedModuleId,
-		containerRawImageStringPropertyKey: containerImage,
-		containerImageNamePropertyKey:      containerImageOrgAndRepo,
-		containerImageVersionPropertyKey:   containerImageTag,
-		moduleParamsPropertyKey:            hashedSerializedParams,
-	}
-
-	event := newEvent(moduleCategory, loadAction, properties)
-	return event
-}
-
-func NewUnloadModuleEvent(moduleId string) *Event {
-	hashedModuleId := hashString(strings.TrimSpace(moduleId))
-	properties := map[string]string{
-		moduleIDPropertyKey: hashedModuleId,
-	}
-	event := newEvent(moduleCategory, unloadAction, properties)
-	return event
-}
-
-func NewExecuteModuleEvent(moduleId, serializedParams string) *Event {
-	hashedModuleId := hashString(strings.TrimSpace(moduleId))
-
-	hashedSerializedParams := hashString(serializedParams)
-
-	properties := map[string]string{
-		moduleIDPropertyKey:     hashedModuleId,
-		moduleParamsPropertyKey: hashedSerializedParams,
-	}
-
-	event := newEvent(moduleCategory, executeAction, properties)
-	return event
-}
-
 func NewKurtosisRunEvent(packageId string, isRemote bool, isDryRun bool, isScript bool) *Event {
 	isRemotePackageStr := fmt.Sprintf("%v", isRemote)
 	isDryRunStr := fmt.Sprintf("%v", isDryRun)
@@ -163,22 +111,4 @@ func hashString(value string) string {
 	hexValue := fmt.Sprintf("%x", hashedByteSlice)
 
 	return hexValue
-}
-
-// Makes a best-effort attempt to split the container image spec into org-and-repo and tag, returning
-//
-//	emptystrings if it's not successful
-func bestEffortSplitContainerImageIntoOrgRepoAndVersion(containerImage string) (resultOrgAndRepo string, resultTag string) {
-	amountOfColons := strings.Count(containerImage, containerImageSeparatorCharacter)
-	if amountOfColons == 0 {
-		containerImage = containerImage + containerImageSeparatorCharacter + dockerDefaultImageTag
-	}
-	if amountOfColons > validAmountOfColonsInContainerImage {
-		logrus.Debugf("Invalid container image '%v', it has '%v' colons and should have '%v'", containerImage, amountOfColons, validAmountOfColonsInContainerImage)
-		return "", ""
-	}
-
-	containerImageSlice := strings.Split(containerImage, containerImageSeparatorCharacter)
-
-	return containerImageSlice[0], containerImageSlice[1]
 }

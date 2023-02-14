@@ -37,24 +37,6 @@ func (client *doNothingClient) TrackDestroyEnclave(enclaveId string) error {
 	return nil
 }
 
-func (client *doNothingClient) TrackLoadModule(moduleId, containerImage, serializedParams string) error {
-	logrus.Debugf("Do-nothing metrics client TrackLoadModule called with arguments moduleId '%v', containerImage '%v' and serializedParams '%v'; skipping sending event", moduleId, containerImage, serializedParams)
-	client.callback.Success()
-	return nil
-}
-
-func (client *doNothingClient) TrackUnloadModule(moduleId string) error {
-	logrus.Debugf("Do-nothing metrics client TrackUnloadModule called with argument moduleId '%v'; skipping sending event", moduleId)
-	client.callback.Success()
-	return nil
-}
-
-func (client *doNothingClient) TrackExecuteModule(moduleId, serializedParams string) error {
-	logrus.Debugf("Do-nothing metrics client TrackExecuteModule called with argument moduleId '%v' and serializedParams '%v'; skipping sending event", moduleId, serializedParams)
-	client.callback.Success()
-	return nil
-}
-
 func (client *doNothingClient) TrackKurtosisRun(packageId string, isRemote bool, isDryRun bool, isScript bool) error {
 	logrus.Debugf("Do-nothing metrics client TrackKurtosisRun called with arguments packageId '%v', isRemote '%v', isDryRun '%v' and isScript '%v'; skipping sending event", packageId, isRemote, isDryRun, isScript)
 	client.callback.Success()

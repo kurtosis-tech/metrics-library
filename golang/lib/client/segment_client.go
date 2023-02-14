@@ -111,30 +111,6 @@ func (segment *segmentClient) TrackDestroyEnclave(enclaveId string) error {
 	return nil
 }
 
-func (segment *segmentClient) TrackLoadModule(moduleId, containerImage, serializedParams string) error {
-	newEvent := event.NewLoadModuleEvent(moduleId, containerImage, serializedParams)
-	if err := segment.track(newEvent); err != nil {
-		return stacktrace.Propagate(err, "An error occurred tracking load module event")
-	}
-	return nil
-}
-
-func (segment *segmentClient) TrackUnloadModule(moduleId string) error {
-	newEvent := event.NewUnloadModuleEvent(moduleId)
-	if err := segment.track(newEvent); err != nil {
-		return stacktrace.Propagate(err, "An error occurred tracking unload module event")
-	}
-	return nil
-}
-
-func (segment *segmentClient) TrackExecuteModule(moduleId, serializedParams string) error {
-	newEvent := event.NewExecuteModuleEvent(moduleId, serializedParams)
-	if err := segment.track(newEvent); err != nil {
-		return stacktrace.Propagate(err, "An error occurred tracking execute module event")
-	}
-	return nil
-}
-
 func (segment *segmentClient) TrackKurtosisRun(packageId string, isRemote bool, isDryRun bool, isScript bool) error {
 	newEvent := event.NewKurtosisRunEvent(packageId, isRemote, isDryRun, isScript)
 	if err := segment.track(newEvent); err != nil {
