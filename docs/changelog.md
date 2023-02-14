@@ -1,11 +1,15 @@
 # TBD
 
+<<<<<<< HEAD
 ### Changes
 - Removed metrics for tracking module related events
 
 ### Breaking Changes
 - Removed metrics for tracking module related events
   - Clients using module tracking should stop using it
+
+### Features
+- Added `is_ci` with every event that gets published
 
 # 0.2.2
 
