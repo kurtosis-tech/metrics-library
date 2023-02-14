@@ -24,12 +24,15 @@ const (
 	retryBackoffCap          = time.Hour * 24
 
 	batchSizeValueForFlushAfterEveryEvent = 1
+
+	isCIKey = "is_ci"
 )
 
 type segmentClient struct {
 	client           analytics.Client
 	analyticsContext *analytics.Context
 	userID           string
+	isCI             string
 }
 
 // The argument shouldFlushQueueOnEachEvent is used to imitate a sync request, it is not exactly the same because
@@ -74,7 +77,7 @@ func newSegmentClient(source metrics_source.Source, sourceVersion string, userId
 		}
 	}
 
-	return &segmentClient{client: client, analyticsContext: analyticsContext, userID: userId}, nil
+	return &segmentClient{client: client, analyticsContext: analyticsContext, userID: userId, isCI: isCI()}, nil
 }
 
 func (segment *segmentClient) TrackShouldSendMetricsUserElection(didUserAcceptSendingMetrics bool) error {
@@ -140,6 +143,8 @@ func (segment *segmentClient) track(event *event.Event) error {
 	for propertyKey, propertyValue := range eventProperties {
 		propertiesToTrack.Set(propertyKey, propertyValue)
 	}
+
+	propertiesToTrack.Set(isCIKey, segment.isCI)
 
 	if err := segment.client.Enqueue(analytics.Track{
 		Event:      event.GetName(),

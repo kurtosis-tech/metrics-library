@@ -4,8 +4,6 @@ import (
 	"strings"
 )
 
-const isCIKey = "is_ci"
-
 type Event struct {
 	//Category of event (e.g. enclave, module)
 	category string
@@ -30,8 +28,6 @@ func newEvent(category string, action string, properties map[string]string) *Eve
 		propertyKeyWithoutSpaces := strings.TrimSpace(propertyKey)
 		propertiesToSend[propertyKeyWithoutSpaces] = propertyValue
 	}
-
-	properties[isCIKey] = isCI()
 
 	event := &Event{
 		category:   categoryWithoutSpaces,

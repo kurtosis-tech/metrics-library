@@ -1,4 +1,4 @@
-package event
+package client
 
 import (
 	"github.com/stretchr/testify/require"
