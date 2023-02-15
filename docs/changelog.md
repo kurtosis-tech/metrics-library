@@ -1,6 +1,6 @@
 # TBD
 
-# 0.2.3
+# 0.3.0
 
 ### Changes
 - Removed metrics for tracking module related events
