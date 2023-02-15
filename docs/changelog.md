@@ -1,6 +1,7 @@
 # TBD
 
-<<<<<<< HEAD
+# 0.2.3
+
 ### Changes
 - Removed metrics for tracking module related events
 
@@ -10,6 +11,7 @@
 
 ### Features
 - Added `is_ci` with every event that gets published
+- Added `os` and `arch` with every event that gets published
 
 # 0.2.2
 
