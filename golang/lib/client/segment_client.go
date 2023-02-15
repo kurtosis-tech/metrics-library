@@ -127,8 +127,8 @@ func (segment *segmentClient) TrackKurtosisRun(packageId string, isRemote bool, 
 	return nil
 }
 
-func (segment *segmentClient) TrackKurtosisRunFinishedEvent(packageId string, numberOfServices int) error {
-	newEvent := event.NewKurtosisRunFinishedEvent(packageId, numberOfServices)
+func (segment *segmentClient) TrackKurtosisRunFinishedEvent(packageId string, numberOfServices int, isSuccess bool) error {
+	newEvent := event.NewKurtosisRunFinishedEvent(packageId, numberOfServices, isSuccess)
 	if err := segment.track(newEvent); err != nil {
 		return stacktrace.Propagate(err, "An error occurred tracking kurtosis run finished event")
 	}

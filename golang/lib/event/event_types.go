@@ -16,6 +16,7 @@ const (
 	isDryRunKey                    = "is_dry_run"
 	isScriptKey                    = "is_script"
 	numServicesKey                 = "num_services"
+	isSuccessKey                   = "is_success"
 
 	//Categories
 	installCategory = "install"
@@ -94,11 +95,13 @@ func NewKurtosisRunEvent(packageId string, isRemote bool, isDryRun bool, isScrip
 	return event
 }
 
-func NewKurtosisRunFinishedEvent(packageId string, numServices int) *Event {
+func NewKurtosisRunFinishedEvent(packageId string, numServices int, isSuccess bool) *Event {
 	numServicesStr := fmt.Sprintf("%v", numServices)
+	isSuccessStr := fmt.Sprintf("%v", isSuccess)
 	properties := map[string]string{
 		packageIdKey:   packageId,
 		numServicesKey: numServicesStr,
+		isSuccessKey:   isSuccessStr,
 	}
 
 	event := newEvent(kurtosisCategory, runFinishedAction, properties)
