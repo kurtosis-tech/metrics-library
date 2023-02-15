@@ -6,6 +6,7 @@ import (
 	"github.com/kurtosis-tech/stacktrace"
 	"github.com/segmentio/backo-go"
 	"gopkg.in/segmentio/analytics-go.v3"
+	"runtime"
 	"time"
 )
 
@@ -26,6 +27,8 @@ const (
 	batchSizeValueForFlushAfterEveryEvent = 1
 
 	isCIKey = "is_ci"
+	osKey   = "os"
+	archKey = "arch"
 )
 
 type segmentClient struct {
@@ -145,6 +148,8 @@ func (segment *segmentClient) track(event *event.Event) error {
 	}
 
 	propertiesToTrack.Set(isCIKey, segment.isCI)
+	propertiesToTrack.Set(osKey, runtime.GOOS)
+	propertiesToTrack.Set(archKey, runtime.GOARCH)
 
 	if err := segment.client.Enqueue(analytics.Track{
 		Event:      event.GetName(),
