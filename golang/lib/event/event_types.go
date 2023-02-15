@@ -30,10 +30,6 @@ const (
 	stopAction    = "stop"
 	destroyAction = "destroy"
 	runAction     = "run"
-
-	containerImageSeparatorCharacter    = ":"
-	validAmountOfColonsInContainerImage = 1
-	dockerDefaultImageTag               = "latest"
 )
 
 // WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING

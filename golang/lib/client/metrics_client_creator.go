@@ -5,26 +5,26 @@ import (
 	"github.com/kurtosis-tech/stacktrace"
 )
 
-const(
+const (
 	defaultMetricsType = Segment
 )
 
-//The argument shouldFlushQueueOnEachEvent is used to imitate a sync request, it is not exactly the same because
-//the event is enqueued but the queue is flushed suddenly so is pretty close to event traked in sync
-//The argument callbackObject is an object that will be used by the client to notify the
+// The argument shouldFlushQueueOnEachEvent is used to imitate a sync request, it is not exactly the same because
+// the event is enqueued but the queue is flushed suddenly so is pretty close to event traked in sync
+// The argument callbackObject is an object that will be used by the client to notify the
 // application when messages sends to the backend API succeeded or failed.
-func CreateMetricsClient(source source.Source, sourceVersion string, userId string, didUserAcceptSendingMetrics bool, shouldFlushQueueOnEachEvent bool, callbackObject Callback) (MetricsClient, func() error, error) {
+func CreateMetricsClient(source source.Source, sourceVersion string, userId string, backendType string, didUserAcceptSendingMetrics bool, shouldFlushQueueOnEachEvent bool, callbackObject Callback) (MetricsClient, func() error, error) {
 
 	metricsClientType := DoNothing
 
-	if didUserAcceptSendingMetrics{
+	if didUserAcceptSendingMetrics {
 		metricsClientType = defaultMetricsType
 	}
 
 	switch metricsClientType {
 	case Segment:
 		segmentCallback := newSegmentCallback(callbackObject.Success, callbackObject.Failure)
-		metricsClient, err := newSegmentClient(source, sourceVersion, userId, shouldFlushQueueOnEachEvent, segmentCallback)
+		metricsClient, err := newSegmentClient(source, sourceVersion, userId, backendType, shouldFlushQueueOnEachEvent, segmentCallback)
 		if err != nil {
 			return nil, nil, stacktrace.Propagate(err, "An error occurred creating Segment metrics client")
 		}
