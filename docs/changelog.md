@@ -12,6 +12,7 @@
 ### Features
 - Added `is_ci` with every event that gets published
 - Added `os` and `arch` with every event that gets published
+- Added the `backend` to every call
 
 # 0.2.2
 
