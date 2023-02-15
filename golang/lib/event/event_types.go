@@ -15,6 +15,7 @@ const (
 	isRemotePackageKey             = "is_remote_package"
 	isDryRunKey                    = "is_dry_run"
 	isScriptKey                    = "is_script"
+	numServicesKey                 = "num_services"
 
 	//Categories
 	installCategory = "install"
@@ -25,11 +26,12 @@ const (
 	kurtosisCategory = "kurtosis"
 
 	//Actions
-	consentAction = "consent"
-	createAction  = "create"
-	stopAction    = "stop"
-	destroyAction = "destroy"
-	runAction     = "run"
+	consentAction     = "consent"
+	createAction      = "create"
+	stopAction        = "stop"
+	destroyAction     = "destroy"
+	runAction         = "run"
+	runFinishedAction = "run-finished"
 )
 
 // WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
@@ -89,6 +91,17 @@ func NewKurtosisRunEvent(packageId string, isRemote bool, isDryRun bool, isScrip
 	}
 
 	event := newEvent(kurtosisCategory, runAction, properties)
+	return event
+}
+
+func NewKurtosisRunFinishedEvent(packageId string, numServices int) *Event {
+	numServicesStr := fmt.Sprintf("%v", numServices)
+	properties := map[string]string{
+		packageIdKey:   packageId,
+		numServicesKey: numServicesStr,
+	}
+
+	event := newEvent(kurtosisCategory, runFinishedAction, properties)
 	return event
 }
 

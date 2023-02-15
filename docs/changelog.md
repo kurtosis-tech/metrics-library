@@ -13,6 +13,7 @@
 - Added `is_ci` with every event that gets published
 - Added `os` and `arch` with every event that gets published
 - Added the `backend` to every call
+- Added a `kurtosis-run-finished` event to track number of services created by a package when the package is finished running
 
 # 0.2.2
 
