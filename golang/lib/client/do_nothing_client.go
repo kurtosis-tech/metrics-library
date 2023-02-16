@@ -43,6 +43,12 @@ func (client *doNothingClient) TrackKurtosisRun(packageId string, isRemote bool,
 	return nil
 }
 
+func (client *doNothingClient) TrackKurtosisRunFinishedEvent(packageId string, numberOfServices int, isSuccess bool) error {
+	logrus.Debugf("Do-nothing metrics client TrackKurtosisRunFinishedEvent called with arguments packageId '%v', numberOfServices '%v' and isSuccess '%v'; skipping sending event", packageId, numberOfServices, isSuccess)
+	client.callback.Success()
+	return nil
+}
+
 func (client *doNothingClient) close() (err error) {
 	logrus.Debugf("Do-nothing metrics client close method called")
 	return nil
