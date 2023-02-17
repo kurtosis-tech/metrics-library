@@ -83,9 +83,10 @@ func NewKurtosisRunEvent(packageId string, isRemote bool, isDryRun bool, isScrip
 	isRemotePackageStr := fmt.Sprintf("%v", isRemote)
 	isDryRunStr := fmt.Sprintf("%v", isDryRun)
 	isScriptStr := fmt.Sprintf("%v", isScript)
+	hashedPackageId := hashString(strings.TrimSpace(packageId))
 
 	properties := map[string]string{
-		packageIdKey:       packageId,
+		packageIdKey:       hashedPackageId,
 		isRemotePackageKey: isRemotePackageStr,
 		isDryRunKey:        isDryRunStr,
 		isScriptKey:        isScriptStr,
