@@ -1,5 +1,8 @@
 # TBD
 
+### Fixes
+- Hashed the `package_id`
+
 # 0.3.0
 
 ### Changes
