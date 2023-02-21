@@ -97,10 +97,11 @@ func NewKurtosisRunEvent(packageId string, isRemote bool, isDryRun bool, isScrip
 }
 
 func NewKurtosisRunFinishedEvent(packageId string, numServices int, isSuccess bool) *Event {
+	hashedPackageId := hashString(packageId)
 	numServicesStr := fmt.Sprintf("%v", numServices)
 	isSuccessStr := fmt.Sprintf("%v", isSuccess)
 	properties := map[string]string{
-		packageIdKey:   packageId,
+		packageIdKey:   hashedPackageId,
 		numServicesKey: numServicesStr,
 		isSuccessKey:   isSuccessStr,
 	}
