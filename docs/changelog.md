@@ -2,6 +2,7 @@
 
 ### Fixes
 - Hashed the `package_id`
+- Hashed the `package_id` in the enclave size tracking event
 
 # 0.3.0
 
