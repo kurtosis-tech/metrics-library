@@ -17,6 +17,7 @@ const (
 	isScriptKey                    = "is_script"
 	numServicesKey                 = "num_services"
 	isSuccessKey                   = "is_success"
+	isSubnetworkingEnabledKey      = "is_subnetworking_enabled"
 
 	//Categories
 	installCategory = "install"
@@ -52,10 +53,12 @@ func NewShouldSendMetricsUserElectionEvent(didUserAcceptSendingMetrics bool) *Ev
 	return event
 }
 
-func NewCreateEnclaveEvent(enclaveId string) *Event {
+func NewCreateEnclaveEvent(enclaveId string, isSubnetworkingEnabled bool) *Event {
 	hashedEnclaveId := hashString(strings.TrimSpace(enclaveId))
+	isSubnetworkingEnabledStr := fmt.Sprintf("%v", isSubnetworkingEnabled)
 	properties := map[string]string{
-		enclaveIDPropertyKey: hashedEnclaveId,
+		enclaveIDPropertyKey:      hashedEnclaveId,
+		isSubnetworkingEnabledKey: isSubnetworkingEnabledStr,
 	}
 	event := newEvent(enclaveCategory, createAction, properties)
 	return event

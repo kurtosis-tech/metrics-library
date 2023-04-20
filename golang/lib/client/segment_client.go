@@ -94,8 +94,8 @@ func (segment *segmentClient) TrackShouldSendMetricsUserElection(didUserAcceptSe
 	return nil
 }
 
-func (segment *segmentClient) TrackCreateEnclave(enclaveId string) error {
-	newEvent := event.NewCreateEnclaveEvent(enclaveId)
+func (segment *segmentClient) TrackCreateEnclave(enclaveId string, isSubnetworkingEnabled bool) error {
+	newEvent := event.NewCreateEnclaveEvent(enclaveId, isSubnetworkingEnabled)
 
 	if err := segment.track(newEvent); err != nil {
 		return stacktrace.Propagate(err, "An error occurred tracking create enclave event")

@@ -3,6 +3,7 @@
 ### Fixes
 - Hashed the `package_id`
 - Hashed the `package_id` in the enclave size tracking event
+- Add `is_subnetworking_enabled` to CreateEnclaveEvent
 
 # 0.3.0
 
