@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	//We are following these naming conventions for event's data
-	//https://segment.com/docs/getting-started/04-full-install/#event-naming-best-practices
+	// We are following these naming conventions for event's data
+	// https://segment.com/docs/getting-started/04-full-install/#event-naming-best-practices
 	enclaveIDPropertyKey           = "enclave_id"
 	didUserAcceptSendingMetricsKey = "did_user_accept_sending_metrics"
 	packageIdKey                   = "package_id"
@@ -19,7 +19,7 @@ const (
 	isSuccessKey                   = "is_success"
 	isSubnetworkingEnabledKey      = "is_subnetworking_enabled"
 
-	//Categories
+	// Categories
 	installCategory = "install"
 	enclaveCategory = "enclave"
 	// the Kurtosis category is for commands at the root level of the cli
@@ -27,7 +27,7 @@ const (
 	// any further root level commands should use this category
 	kurtosisCategory = "kurtosis"
 
-	//Actions
+	// Actions
 	consentAction     = "consent"
 	createAction      = "create"
 	stopAction        = "stop"
@@ -86,10 +86,9 @@ func NewKurtosisRunEvent(packageId string, isRemote bool, isDryRun bool, isScrip
 	isRemotePackageStr := fmt.Sprintf("%v", isRemote)
 	isDryRunStr := fmt.Sprintf("%v", isDryRun)
 	isScriptStr := fmt.Sprintf("%v", isScript)
-	hashedPackageId := hashString(strings.TrimSpace(packageId))
 
 	properties := map[string]string{
-		packageIdKey:       hashedPackageId,
+		packageIdKey:       packageId,
 		isRemotePackageKey: isRemotePackageStr,
 		isDryRunKey:        isDryRunStr,
 		isScriptKey:        isScriptStr,
@@ -100,11 +99,10 @@ func NewKurtosisRunEvent(packageId string, isRemote bool, isDryRun bool, isScrip
 }
 
 func NewKurtosisRunFinishedEvent(packageId string, numServices int, isSuccess bool) *Event {
-	hashedPackageId := hashString(packageId)
 	numServicesStr := fmt.Sprintf("%v", numServices)
 	isSuccessStr := fmt.Sprintf("%v", isSuccess)
 	properties := map[string]string{
-		packageIdKey:   hashedPackageId,
+		packageIdKey:   packageId,
 		numServicesKey: numServicesStr,
 		isSuccessKey:   isSuccessStr,
 	}
