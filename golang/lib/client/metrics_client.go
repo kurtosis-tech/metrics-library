@@ -2,6 +2,7 @@ package client
 
 type MetricsClient interface {
 	TrackShouldSendMetricsUserElection(didUserAcceptSendingMetrics bool) error
+	TrackUserSharedEmailAddress(userSharedEmailAddress string) error
 	TrackCreateEnclave(enclaveId string, isSubnetworkingEnabled bool) error
 	TrackStopEnclave(enclaveId string) error
 	TrackDestroyEnclave(enclaveId string) error

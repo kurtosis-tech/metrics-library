@@ -18,6 +18,7 @@ const (
 	numServicesKey                 = "num_services"
 	isSuccessKey                   = "is_success"
 	isSubnetworkingEnabledKey      = "is_subnetworking_enabled"
+	userEmailAddressKey            = "user_email"
 
 	// Categories
 	installCategory = "install"
@@ -29,6 +30,7 @@ const (
 
 	// Actions
 	consentAction     = "consent"
+	shareEmailAction  = "share-email"
 	createAction      = "create"
 	stopAction        = "stop"
 	destroyAction     = "destroy"
@@ -50,6 +52,14 @@ func NewShouldSendMetricsUserElectionEvent(didUserAcceptSendingMetrics bool) *Ev
 		didUserAcceptSendingMetricsKey: didUserAcceptSendingMetricsStr,
 	}
 	event := newEvent(installCategory, consentAction, properties)
+	return event
+}
+
+func NewUserSharesEmailAddress(userSharedEmailAddress string) *Event {
+	properties := map[string]string{
+		userEmailAddressKey: userSharedEmailAddress,
+	}
+	event := newEvent(installCategory, shareEmailAction, properties)
 	return event
 }
 
