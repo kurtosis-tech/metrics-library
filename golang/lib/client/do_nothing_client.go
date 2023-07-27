@@ -20,7 +20,7 @@ func (client *doNothingClient) TrackShouldSendMetricsUserElection(didUserAcceptS
 }
 
 func (client *doNothingClient) TrackUserSharedEmailAddress(userSharedEmailAddress string) error {
-	logrus.Debugf("Do-nothing metrics client TrackUserSharedEmailAddress called with argument userSharedEmailAddress '%v'; skipping sending event", userSharedEmailAddress)
+	logrus.Debugf("Do-nothing metrics client TrackUserSharedEmailAddress called with argument; skipping sending event")
 	client.callback.Success()
 	return nil
 }
