@@ -96,6 +96,14 @@ func (segment *segmentClient) TrackShouldSendMetricsUserElection(didUserAcceptSe
 	return nil
 }
 
+func (segment *segmentClient) TrackUserSharedEmailAddress(userSharedEmailAddress string) error {
+	newEvent := event.NewUserSharesEmailAddress(userSharedEmailAddress)
+	if err := segment.track(newEvent); err != nil {
+		return stacktrace.Propagate(err, "An error occurred tracking user-shares-email-address event")
+	}
+	return nil
+}
+
 func (segment *segmentClient) TrackCreateEnclave(enclaveId string, isSubnetworkingEnabled bool) error {
 	newEvent := event.NewCreateEnclaveEvent(enclaveId, isSubnetworkingEnabled)
 

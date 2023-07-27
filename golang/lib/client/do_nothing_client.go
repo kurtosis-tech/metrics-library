@@ -19,6 +19,12 @@ func (client *doNothingClient) TrackShouldSendMetricsUserElection(didUserAcceptS
 	return nil
 }
 
+func (client *doNothingClient) TrackUserSharedEmailAddress(userSharedEmailAddress string) error {
+	logrus.Debugf("Do-nothing metrics client TrackUserSharedEmailAddress called with argument userSharedEmailAddress '%v'; skipping sending event", userSharedEmailAddress)
+	client.callback.Success()
+	return nil
+}
+
 func (client *doNothingClient) TrackCreateEnclave(enclaveId string, isSubnetworkingEnabled bool) error {
 	logrus.Debugf("Do-nothing metrics client TrackCreateEnclave called with argument enclaveId '%v', isSubnetworkingEnabled '%v'; skipping sending event", enclaveId, isSubnetworkingEnabled)
 	client.callback.Success()
