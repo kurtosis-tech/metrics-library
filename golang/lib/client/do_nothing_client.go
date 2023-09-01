@@ -55,6 +55,12 @@ func (client *doNothingClient) TrackKurtosisRunFinishedEvent(packageId string, n
 	return nil
 }
 
+func (client *doNothingClient) TrackKurtosisAnalyticsToggle(analyticsStatus bool) error {
+	logrus.Debugf("Do-nothing metrics client TrackKurtosisAnalyticsToggle called with arguments analyticsStatus '%v'", analyticsStatus)
+	client.callback.Success()
+	return nil
+}
+
 func (client *doNothingClient) close() (err error) {
 	logrus.Debugf("Do-nothing metrics client close method called")
 	return nil
