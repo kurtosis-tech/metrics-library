@@ -19,6 +19,7 @@ const (
 	isSuccessKey                   = "is_success"
 	isSubnetworkingEnabledKey      = "is_subnetworking_enabled"
 	userEmailAddressKey            = "user_email"
+	analyticsStatusKey             = "analytics_status"
 
 	// Categories
 	installCategory = "install"
@@ -29,13 +30,14 @@ const (
 	kurtosisCategory = "kurtosis"
 
 	// Actions
-	consentAction     = "consent"
-	shareEmailAction  = "share-email"
-	createAction      = "create"
-	stopAction        = "stop"
-	destroyAction     = "destroy"
-	runAction         = "run"
-	runFinishedAction = "run-finished"
+	consentAction         = "consent"
+	shareEmailAction      = "share-email"
+	createAction          = "create"
+	stopAction            = "stop"
+	destroyAction         = "destroy"
+	runAction             = "run"
+	runFinishedAction     = "run-finished"
+	analyticsToggleAction = "analytics-toggle"
 )
 
 // WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
@@ -118,6 +120,14 @@ func NewKurtosisRunFinishedEvent(packageId string, numServices int, isSuccess bo
 	}
 
 	event := newEvent(kurtosisCategory, runFinishedAction, properties)
+	return event
+}
+
+func NewKurtosisAnalyticsToggleEvent(analayticsStatus bool) *Event {
+	properties := map[string]string{
+		analyticsStatusKey: fmt.Sprintf("%v", analayticsStatus),
+	}
+	event := newEvent(kurtosisCategory, analyticsToggleAction, properties)
 	return event
 }
 

@@ -145,6 +145,14 @@ func (segment *segmentClient) TrackKurtosisRunFinishedEvent(packageId string, nu
 	return nil
 }
 
+func (segment *segmentClient) TrackKurtosisAnalyticsToggle(analyticsStatus bool) error {
+	newEvent := event.NewKurtosisAnalyticsToggleEvent(analyticsStatus)
+	if err := segment.track(newEvent); err != nil {
+		return stacktrace.Propagate(err, "an error occurred while tracking kurtosis analytics toggle event")
+	}
+	return nil
+}
+
 func (segment *segmentClient) close() (err error) {
 	if err := segment.client.Close(); err != nil {
 		return stacktrace.Propagate(err, "An error occurred closing the Segment client")
