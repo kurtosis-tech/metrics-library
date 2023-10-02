@@ -129,16 +129,16 @@ func (segment *segmentClient) TrackDestroyEnclave(enclaveId string) error {
 	return nil
 }
 
-func (segment *segmentClient) TrackKurtosisRun(packageId string, isRemote bool, isDryRun bool, isScript bool) error {
-	newEvent := event.NewKurtosisRunEvent(packageId, isRemote, isDryRun, isScript)
+func (segment *segmentClient) TrackKurtosisRun(packageId string, isRemote bool, isDryRun bool, isScript bool, cloudInstanceId string, cloudUserId string) error {
+	newEvent := event.NewKurtosisRunEvent(packageId, isRemote, isDryRun, isScript, cloudInstanceId, cloudUserId)
 	if err := segment.track(newEvent); err != nil {
 		return stacktrace.Propagate(err, "An error occurred tracking run kurtosis event")
 	}
 	return nil
 }
 
-func (segment *segmentClient) TrackKurtosisRunFinishedEvent(packageId string, numberOfServices int, isSuccess bool) error {
-	newEvent := event.NewKurtosisRunFinishedEvent(packageId, numberOfServices, isSuccess)
+func (segment *segmentClient) TrackKurtosisRunFinishedEvent(packageId string, numberOfServices int, isSuccess bool, cloudInstanceId string, cloudUserId string) error {
+	newEvent := event.NewKurtosisRunFinishedEvent(packageId, numberOfServices, isSuccess, cloudInstanceId, cloudUserId)
 	if err := segment.track(newEvent); err != nil {
 		return stacktrace.Propagate(err, "An error occurred tracking kurtosis run finished event")
 	}

@@ -29,6 +29,10 @@ const (
 	// any further root level commands should use this category
 	kurtosisCategory = "kurtosis"
 
+	// cloud specific properites
+	cloudInstanceIdKey = "cloud-instance-id"
+	cloudUserIdKey     = "cloud-user-id"
+
 	// Actions
 	consentAction         = "consent"
 	shareEmailAction      = "share-email"
@@ -94,7 +98,7 @@ func NewDestroyEnclaveEvent(enclaveId string) *Event {
 	return event
 }
 
-func NewKurtosisRunEvent(packageId string, isRemote bool, isDryRun bool, isScript bool) *Event {
+func NewKurtosisRunEvent(packageId string, isRemote bool, isDryRun bool, isScript bool, cloudInstanceId string, cloudUserId string) *Event {
 	isRemotePackageStr := fmt.Sprintf("%v", isRemote)
 	isDryRunStr := fmt.Sprintf("%v", isDryRun)
 	isScriptStr := fmt.Sprintf("%v", isScript)
@@ -104,19 +108,23 @@ func NewKurtosisRunEvent(packageId string, isRemote bool, isDryRun bool, isScrip
 		isRemotePackageKey: isRemotePackageStr,
 		isDryRunKey:        isDryRunStr,
 		isScriptKey:        isScriptStr,
+		cloudInstanceIdKey: cloudInstanceId,
+		cloudUserIdKey:     cloudUserId,
 	}
 
 	event := newEvent(kurtosisCategory, runAction, properties)
 	return event
 }
 
-func NewKurtosisRunFinishedEvent(packageId string, numServices int, isSuccess bool) *Event {
+func NewKurtosisRunFinishedEvent(packageId string, numServices int, isSuccess bool, cloudInstanceId string, cloudUserId string) *Event {
 	numServicesStr := fmt.Sprintf("%v", numServices)
 	isSuccessStr := fmt.Sprintf("%v", isSuccess)
 	properties := map[string]string{
-		packageIdKey:   packageId,
-		numServicesKey: numServicesStr,
-		isSuccessKey:   isSuccessStr,
+		packageIdKey:       packageId,
+		numServicesKey:     numServicesStr,
+		isSuccessKey:       isSuccessStr,
+		cloudInstanceIdKey: cloudInstanceId,
+		cloudUserIdKey:     cloudUserId,
 	}
 
 	event := newEvent(kurtosisCategory, runFinishedAction, properties)
